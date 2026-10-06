@@ -1,0 +1,20 @@
+import { givingOpportunities, type GivingOpportunity } from './giving';
+import { allEvents, type TempleEvent } from './events';
+import { demoDonations, demoDonor, type DemoDonation } from './account-demo';
+export type AdminGiving = GivingOpportunity & { active: boolean };
+export type AdminDonation = DemoDonation & { donor: string; email: string; phone: string; givingSlug: string; category: string; eventSlug?: string; eventTitle?: string; transactionReference?: string };
+export type AdminState = { giving: AdminGiving[]; events: TempleEvent[]; donations: AdminDonation[] };
+export const adminStorageKey = 'pushthidham-admin-demo-v1';
+export const adminImages = [...new Set(givingOpportunities.map(item=>item.image))];
+const donorName = `${demoDonor.firstName} ${demoDonor.lastName}`;
+const initialDonations: AdminDonation[] = demoDonations.map(item=>{const giving=givingOpportunities.find(g=>g.title===item.givingFor)!;return {...item,donor:donorName,email:demoDonor.email,phone:demoDonor.phone,givingSlug:giving.slug,category:giving.category,...(item.givingFor==='Festival Sponsorship'?{eventSlug:'janmashtami-celebration-2025',eventTitle:'Janmashtami Celebration'}:{}),...(item.method==='Bank Transfer'?{transactionReference:`DEMO-BANK-${item.reference.slice(-4)}`}:{})};});
+export function createAdminState():AdminState{return {giving:givingOpportunities.map(g=>({...g,active:true})),events:allEvents.map(e=>({...e,schedule:e.schedule.map(s=>({...s}))})),donations:[...initialDonations,
+{reference:'PH-2026-1005-1208',date:'2026-10-05',givingFor:'Annakut Mahotsav',givingSlug:'annakut-mahotsav',category:'Festivals',donor:'Rohan Patel',email:'rohan.patel@example.com',phone:'',amountCents:50100,method:'Bank Transfer',status:'Pending',eventSlug:'annakut-mahotsav-2026',eventTitle:'Annakut Mahotsav',transactionReference:'DEMO-BANK-1208'},
+{reference:'PH-2026-1004-1196',date:'2026-10-04',givingFor:'Community & Religious Activities',givingSlug:'community-religious-activities',category:'Community',donor:'Meera Desai',email:'meera.desai@example.com',phone:'',amountCents:25100,method:'PayPal',status:'Completed'},
+{reference:'PH-2026-1002-1181',date:'2026-10-02',givingFor:'Temple Seva',givingSlug:'temple-seva',category:'Seva',donor:'Arjun Shah',email:'arjun.shah@example.com',phone:'',amountCents:10100,method:'Bank Transfer',status:'Pending',transactionReference:'DEMO-BANK-1181'},
+{reference:'PH-2026-0929-1145',date:'2026-09-29',givingFor:'Prasad Seva',givingSlug:'prasad-seva',category:'Seva',donor:'Nisha Patel',email:'nisha.patel@example.com',phone:'',amountCents:5100,method:'Bank Transfer',status:'Rejected',transactionReference:'DEMO-BANK-1145'}]};}
+export function donationTotals(rows:AdminDonation[]){const sum=(status?:string)=>rows.filter(d=>!status||d.status===status).reduce((n,d)=>n+d.amountCents,0);return {total:sum(),completed:sum('Completed'),pending:sum('Pending'),donors:new Set(rows.map(d=>d.email)).size};}
+export type DonationFilters={search:string;status:string;method:string;category:string;from:string;to:string};
+export const emptyDonationFilters:DonationFilters={search:'',status:'All',method:'All',category:'All',from:'',to:''};
+export function filterDonations(rows:AdminDonation[],f:DonationFilters){return rows.filter(d=>(f.status==='All'||d.status===f.status)&&(f.method==='All'||d.method===f.method)&&(f.category==='All'||d.category===f.category)&&(!f.from||d.date>=f.from)&&(!f.to||d.date<=f.to)&&`${d.reference} ${d.donor} ${d.email} ${d.givingFor} ${d.eventTitle||''}`.toLowerCase().includes(f.search.trim().toLowerCase())).sort((a,b)=>b.date.localeCompare(a.date));}
+export function donationCsv(rows:AdminDonation[]){const quote=(v:string|number)=>{const text=String(v);return '"'+(/^[=+@\-\t\r]/.test(text)?"'":'')+text.replaceAll('"','""')+'"';};return [['Reference','Donor','Email','Giving For','Event','Amount USD','Payment Method','Date','Status'],...rows.map(d=>[d.reference,d.donor,d.email,d.givingFor,d.eventTitle||'',(d.amountCents/100).toFixed(2),d.method,d.date,d.status])].map(row=>row.map(quote).join(',')).join('\r\n');}
