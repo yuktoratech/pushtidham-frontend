@@ -1,3 +1,4 @@
+import { eventDonationPath } from '../lib/donation-selection';
 import { PageLink } from './page-link';
 import { CalendarDays, Clock, MapPin, ChevronRight, HandHeart } from 'lucide-react';
 import { eventDate, upcomingEvents, type TempleEvent } from '../lib/events';
@@ -11,7 +12,7 @@ export function EventSchedule({event}:{event:TempleEvent}) {
   return <section className="event-schedule" aria-labelledby="schedule-title"><p className="eyebrow">{event.past?'Celebration programme':'A day of devotion'}</p><h2 id="schedule-title">Event Schedule</h2><p className="schedule-timezone">All times Eastern Time</p><ol>{event.schedule.map(item=><li key={item.time}><span className="schedule-time">{item.time}</span><div><h3>{item.title}</h3><p>{item.description}</p></div></li>)}</ol></section>;
 }
 export function EventSupport({event}:{event:TempleEvent}) {
-  return <section className="event-support" aria-labelledby="support-title"><HandHeart aria-hidden="true"/><h2 id="support-title">{event.past?'Keep Our Traditions Alive':'Support This Event'}</h2><p>Your generosity supports festival seva, prasadam and the celebrations that bring our community together.</p><Button href={`/giving?event=${encodeURIComponent(event.slug)}&opportunity=${event.kind==='annakut'?'annakut-mahotsav':'festival-sponsorship'}`}>Donate Now</Button></section>;
+  return <section className="event-support" aria-labelledby="support-title"><HandHeart aria-hidden="true"/><h2 id="support-title">{event.past?'Keep Our Traditions Alive':'Support This Event'}</h2><p>Your generosity supports festival seva, prasadam and the celebrations that bring our community together.</p><Button href={eventDonationPath(event.slug)}>Donate Now</Button></section>;
 }
 export function EventDetails({event}:{event:TempleEvent}) {
   const related = upcomingEvents.filter(other=>other.id!==event.id&&other.kind!==event.kind).slice(0,2);

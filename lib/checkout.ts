@@ -1,6 +1,6 @@
-import { getGivingOpportunity } from './giving';
-import { getEvent } from './events';
-import { donationQuery, type DonationSelection } from './donation-selection';
+import { givingOpportunities, type GivingOpportunity } from './giving';
+import { allEvents, type TempleEvent } from './events';
+import { donationQuery, amountMatchesOpportunity, type DonationSelection } from './donation-selection';
 import type { DemoDonor } from './account-demo';
 
 export type PaymentMethod = 'paypal' | 'bank-transfer';
@@ -8,19 +8,34 @@ export type CheckoutDraft = {donor:DemoDonor;method:PaymentMethod;transactionRef
 export const checkoutDraftKey='pushthidham-checkout-draft';
 export const emptyDonor:DemoDonor={firstName:'',lastName:'',email:'',phone:''};
 export const bankTransferPreview={bankName:'To be provided by temple',accountName:'To be provided by temple',accountNumber:'To be provided',routingNumber:'To be provided',demoReference:'PHD-DEMO-001'};
-export function readDonationSelection(query:URLSearchParams):DonationSelection|null{
-  const opportunity=getGivingOpportunity(query.get('giving')||'');
+export type DonationCatalog={giving:(GivingOpportunity & {active?:boolean})[];events:TempleEvent[]};
+const defaultCatalog:DonationCatalog={giving:givingOpportunities,events:allEvents};
+export function readDonationSelection(query:URLSearchParams,catalog:DonationCatalog=defaultCatalog):DonationSelection|null{
   const amount=Number(query.get('amount'));
-  if(!opportunity||!Number.isSafeInteger(amount)||amount<=0||query.get('type')!=='one-time')return null;
+  if(!Number.isSafeInteger(amount)||amount<=0||query.get('type')!=='one-time')return null;
   const rawChoice=query.get('choice');
   const amountChoice=rawChoice==='custom'?'custom':Number(rawChoice);
-  if(amountChoice!=='custom'&&(!opportunity.suggestedAmounts.includes(amountChoice)||amountChoice*100!==amount))return null;
-  const rawEvent=query.get('event');
-  const event=rawEvent?getEvent(rawEvent):null;
-  if(rawEvent&&!event)return null;
-  return {givingSlug:opportunity.slug,amountCents:amount,currency:'USD',donationType:'one-time',amountChoice,...(event?{eventSlug:event.slug,eventId:event.id}:{})};
+  const eventCategory=query.get('category')==='event'||(query.get('category')!=='general'&&query.has('event'));
+  if(eventCategory){
+    const event=catalog.events.find(e=>e.slug===query.get('event')&&!e.past);
+    if(!event||amountChoice!=='custom')return null;
+    return {categorySlug:'event',eventSlug:event.slug,eventId:event.id,amountCents:amount,currency:'USD',donationType:'one-time',amountChoice};
+  }
+  if(query.has('event'))return null;
+  const opportunity=catalog.giving.find(item=>item.slug===query.get('giving')&&item.active!==false);
+  if(!opportunity||!amountMatchesOpportunity(opportunity,amountChoice,amount))return null;
+  return {categorySlug:'general',givingSlug:opportunity.slug,amountCents:amount,currency:'USD',donationType:'one-time',amountChoice};
 }
-export function editDonationPath(selection:DonationSelection){return `/giving/${selection.givingSlug}?${donationQuery(selection)}`;}
+export function donationContext(selection:DonationSelection,catalog:DonationCatalog){
+  if(selection.categorySlug==='event'){
+    const event=catalog.events.find(e=>e.slug===selection.eventSlug)!;
+    return {...event,category:'Event' as const,event};
+  }
+  const giving=catalog.giving.find(g=>g.slug===selection.givingSlug)!;
+  return {...giving,category:'General' as const,event:undefined};
+}
+
+export function editDonationPath(selection:DonationSelection){return `/donate?${donationQuery(selection)}`;}
 export function validateCheckout(donor:DemoDonor,method:PaymentMethod,reference:string){
   const errors:Partial<Record<keyof DemoDonor|'transactionReference',string>>={};
   if(!donor.firstName.trim())errors.firstName='Please enter your first name.';
