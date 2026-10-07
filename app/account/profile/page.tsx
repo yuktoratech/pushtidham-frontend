@@ -2,7 +2,7 @@
 import { useState, type FormEvent } from 'react';
 import { Check, PencilLine, UserRound } from 'lucide-react';
 import { AccountLayout } from '../../../components/account-layout';
-import { FormError, FormInput } from '../../../components/auth-form';
+import { FormInput } from '../../../components/auth-form';
 import { demoDonor, type DemoDonor } from '../../../lib/account-demo';
 type ProfileField='firstName'|'lastName'|'email'|'phone';
 type ProfileErrors=Partial<Record<ProfileField,string>>;

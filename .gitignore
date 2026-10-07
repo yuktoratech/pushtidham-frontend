@@ -1,7 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
+node_modules/
 /.pnp
 .pnp.js
 
@@ -14,22 +14,48 @@
 
 # production
 /build
+dist/
 
 # misc
 .DS_Store
+Thumbs.db
+Desktop.ini
 *.pem
+*.key
+*.p12
+*.pfx
 
 # debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+*.log
+.eslintcache
+.cache/
+.turbo/
+.pnpm-store/
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+*.swo
+test-results/
+playwright-report/
+blob-report/
+/public/__final-qa.html
 
 # local env files
-.env*.local
 .env
+.env.*
+!.env.example
+!.env.*.example
 
 # vercel
 .vercel
+.wrangler/
+.vscode/
+.idea/
 
 # typescript
 *.tsbuildinfo

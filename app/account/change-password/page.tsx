@@ -2,7 +2,7 @@
 import { useState, type FormEvent } from 'react';
 import { Check, KeyRound } from 'lucide-react';
 import { AccountLayout } from '../../../components/account-layout';
-import { FormError, PasswordInput } from '../../../components/auth-form';
+import { PasswordInput } from '../../../components/auth-form';
 import { passwordRequirements } from '../../../lib/auth-ui';
 type Field='currentPassword'|'newPassword'|'confirmPassword';
 type Values=Record<Field,string>;

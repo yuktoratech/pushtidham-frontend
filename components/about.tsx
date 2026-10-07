@@ -1,3 +1,4 @@
+import { PageLink } from './page-link';
 import type { LucideIcon } from 'lucide-react';
 import { ChevronRight, Flower2, HandHeart, HeartHandshake, UsersRound } from 'lucide-react';
 
@@ -15,7 +16,7 @@ export function AboutHero() {
 }
 
 export function Breadcrumb({ current }: { current: string }) {
-  return <nav className="container about-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><ChevronRight size={14} aria-hidden="true"/><span aria-current="page">{current}</span></nav>;
+  return <nav className="container about-breadcrumb" aria-label="Breadcrumb"><PageLink href="/">Home</PageLink><ChevronRight size={14} aria-hidden="true"/><span aria-current="page">{current}</span></nav>;
 }
 
 export function InformationCard({ icon: Icon, title, children }: { icon: LucideIcon; title: string; children: React.ReactNode }) {
