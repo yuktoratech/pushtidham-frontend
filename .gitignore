@@ -33,7 +33,6 @@ yarn-error.log*
 .eslintcache
 .cache/
 .turbo/
-.pnpm-store/
 tmp/
 temp/
 *.tmp
