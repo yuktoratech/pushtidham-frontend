@@ -9,6 +9,7 @@ export const authCopy = {
   'reset-password': {title:'Reset Password',subtitle:'Choose a new password for your donor account.',button:'Reset Password'},
 };
 export const passwordRequirements = 'Use at least 8 characters, including a letter and a number.';
+export const registrationPasswordRequirements = 'Use 12–72 characters, with no more than 72 UTF-8 bytes.';
 export function validateAuth(mode:AuthMode, values:AuthValues) {
   const errors:Partial<Record<AuthField,string>>={};
   if(mode==='register'){
@@ -21,8 +22,11 @@ export function validateAuth(mode:AuthMode, values:AuthValues) {
   }
   if(mode!=='forgot-password'){
     if(!values.password)errors.password='Please enter your password.';
-    else if(mode!=='login'&&(values.password.length<8||!/[a-zA-Z]/.test(values.password)||!/[0-9]/.test(values.password)))errors.password=passwordRequirements;
+    else if(mode==='register'&&(values.password.length<12||values.password.length>72||new TextEncoder().encode(values.password).length>72))errors.password=registrationPasswordRequirements;
+    else if(mode==='login'&&(values.password.length>72||new TextEncoder().encode(values.password).length>72))errors.password='Password must not exceed 72 UTF-8 bytes.';
+    else if(mode==='reset-password'&&(values.password.length<8||!/[a-zA-Z]/.test(values.password)||!/[0-9]/.test(values.password)))errors.password='Use at least 8 characters, including a letter and a number.';
   }
+  if(mode==='register'&&`${values.firstName.trim()} ${values.lastName.trim()}`.length>120)errors.firstName='Your full name must not exceed 120 characters.';
   if(mode==='register'||mode==='reset-password'){
     if(!values.confirmPassword)errors.confirmPassword='Please confirm your password.';
     else if(values.confirmPassword!==values.password)errors.confirmPassword='Your passwords do not match.';

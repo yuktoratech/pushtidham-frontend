@@ -1,6 +1,6 @@
 import { givingOpportunities, type GivingOpportunity } from './giving';
 import { allEvents, type TempleEvent } from './events';
-import { demoDonations, demoDonor, type DemoDonation } from './account-demo';
+import { demoDonations, sampleDonationContact as demoDonor, type DemoDonation } from './account-demo';
 import type { DonationCategory } from './donation-selection';
 import { parseCustomAmount, parseFixedAmounts } from './donation-selection';
 export type AdminGiving = GivingOpportunity & { active: boolean };

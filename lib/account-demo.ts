@@ -1,16 +1,7 @@
 export type DemoDonor = {firstName:string;lastName:string;email:string;phone:string};
-export const demoDonor:DemoDonor = {
-  firstName: 'Priya',
-  lastName: 'Shah',
-  email: 'donor@pushthidham.org',
-  phone: '(352) 555-0148',
-};
-export const demoDonorDetailsForCheckout = () => ({
-  firstName: demoDonor.firstName,
-  lastName: demoDonor.lastName,
-  email: demoDonor.email,
-  phone: demoDonor.phone,
-});
+// Contact attached only to shared sample donation records; never an authenticated identity.
+export const sampleDonationDonorEmail = 'donor@pushthidham.org';
+export const sampleDonationContact = {firstName:'Priya',lastName:'Shah',email:sampleDonationDonorEmail,phone:'(352) 555-0148'};
 export type DemoDonationStatus = 'Pending' | 'Completed' | 'Rejected';
 export type DemoDonationMethod = 'PayPal' | 'Bank Transfer';
 export type DemoDonation = {

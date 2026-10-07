@@ -17,15 +17,19 @@ Production build: `npm run build`. Next.js writes the production build to `.next
 2. Connect the GitHub repository to Vercel.
 3. Import that repository into Vercel.
 4. Select Next.js as the framework, the folder containing package.json as Root Directory, Node.js 22.x, and npm run build as Build Command. Keep Output Directory at its framework default.
-5. Deploy. No backend/payment environment variables are required for this frontend demo.
+5. Deploy. Configure NEXT_PUBLIC_API_URL and the backend permitted frontend origin before using authentication. Payments remain a demo.
 
-## Demo access
-Donor: /login — donor@pushthidham.org / Demo@123
-Admin: /admin/login — admin@pushthidham.org / Admin@123
+## Real authentication on backend-integration
 
-These are public frontend test credentials only. Route guards and sessions are browser-local, not production authentication.
-Admin management changes remain local to the browser and do not update public listings. Reset Demo Data restores sample admin records.
-Payments, contact messages, registrations, password resets and profile changes are demonstrations; no real payment, email, account or database operation takes place.
+The main branch retains the approved demo. This branch integrates authentication only; Giving, Events, Donations, offline records and reports remain browser-local/demo data.
+
+Copy .env.example to .env.local and configure NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1. This public setting is the API base URL, not a secret. Run the separate backend with its normal npm run dev command, valid private environment configuration and MongoDB, then run this frontend with npm run dev on port 3000. Set backend FRONTEND_URL=http://localhost:3000 exactly. Never commit .env.local or use production secrets in NEXT_PUBLIC variables. Production API URL and backend allowed origin must be configured for the actual deployment, with HTTPS.
+
+Login and public registration use real backend accounts; public registration always creates a donor. Administrators must be seeded manually by the backend operator using private environment variables. There are no hardcoded login credentials or localStorage login flags. Access JWTs stay in memory. Startup rotates the HttpOnly refresh cookie and calls /auth/me. Requests include credentials, and protected requests include a Bearer token. Refresh is single-flight, serialized across tabs where Web Locks are available, with one retry after a 401. Focus rechecks the current identity. Logout must successfully revoke the backend session before the UI clears authentication; failures allow retry. Only old demo session keys are removed; unrelated demo state is retained.
+
+The existing Remember Me checkbox does not extend the backend-controlled absolute session lifetime. Registration combines first and last name into name and sends only name, email and password; phone remains optional UI input and is not persisted by auth. Registration requires 12–72 characters, at most 72 UTF-8 bytes, matching the backend. Authenticated name/email/role come from the backend. Donation history remains explicitly shared sample data, not private real history. Profile/password-update and forgot/reset email APIs are not connected.
+
+Admin management changes remain local to the browser and do not update public listings. Reset Demo Data restores sample admin records. Payments, contact messages, password resets and profile edits remain previews; authentication is real. Production CORS/cookie settings must be agreed with the backend operator before deployment.
 
 ## Pages
 Home, About, Events and dynamic Event Details, Giving and dynamic Giving Details, Contact, donor authentication, donor Account, Checkout, donation success/pending confirmations, and Admin login/dashboard/giving/events/donations/reports.
@@ -39,7 +43,7 @@ The standard npm commands use Next.js directly: `npm run dev`, `npm run build`, 
 
 Commit source, required public assets, configuration, documentation and `package-lock.json`. Dependencies, static exports, build output, local Sites/Cloudflare state, logs, test reports, caches and editor files are ignored.
 
-Environment files (`.env` and `.env.*`) must stay local. Sanitized templates named `.env.example` or `.env.*.example` may be committed. This frontend demo requires no credentials; never put real payment, email or database secrets in client code or public assets.
+Environment files (`.env` and `.env.*`) must stay local. Sanitized templates named `.env.example` or `.env.*.example` may be committed. Authentication uses the configured backend; never put real payment, email, JWT signing or database secrets in client code or public assets.
 
 Validate a clean checkout with Node.js 22.13 or newer and npm:
 

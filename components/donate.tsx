@@ -45,7 +45,7 @@ export function Donate(){
         <div className="auth-field"><label htmlFor="donate-category">Category</label><select id="donate-category" value={category} onChange={e=>{const next=e.target.value as DonationCategory;choose(next,next==='General'?defaultGiving:events[0]?.slug||'');}}><option>General</option><option>Event</option></select></div>
         <div className="auth-field"><label htmlFor="donate-for">Donation For</label><select id="donate-for" value={current?.slug||''} disabled={!options.length} onChange={e=>choose(category,e.target.value)}>{!options.length&&<option value="">No available {category==='General'?'giving items':'events'}</option>}{options.map(item=><option key={item.slug} value={item.slug}>{item.title}{category==='Event'?` — ${eventDate(data.events.find(e=>e.slug===item.slug)!.date)}`:''}</option>)}</select></div>
         <p className="donate-description">{opportunity?.shortDescription||event?.description||'Please return when a donation option is available.'}</p>
-        <p className="checkout-demo-note">Your selected {category==='General'?'giving item':'event'} and amount will be carried into the donation summary. Guest and demo account checkout are available.</p>
+        <p className="checkout-demo-note">Your selected {category==='General'?'giving item':'event'} and amount will be carried into the donation summary. Guest and signed-in account checkout are available.</p>
       </section>{current&&<DonationPanel opportunity={opportunity} event={event}/>}</div>
     </div>
   </div>;
