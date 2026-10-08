@@ -1,13 +1,15 @@
 'use client';
-import { useAdminDemo } from '../hooks/use-admin-demo';
 import { PageLink } from './page-link';
 
 import { useState } from 'react';
 import { Check, Clock3, ChevronRight, HandHeart, Info } from 'lucide-react';
 import { checkoutPath, donationCurrency, donationQuery, type DonationSelection } from '../lib/donation-selection';
 import { bankTransferPreview, checkoutDraftKey, donationContext, readDonationSelection } from '../lib/checkout';
+import { usePublicCatalog } from './catalog-provider';
+import { eventView, givingView } from '../lib/catalog-ui';
 export function DonationConfirmation({pending=false}:{pending?:boolean}){
- const {data,ready:hydrated}=useAdminDemo();const [initializedPending,setInitializedPending]=useState<boolean|null>(null);const [selection,setSelection]=useState<DonationSelection|null>(null);const [ready,setReady]=useState(false);const [transaction,setTransaction]=useState('');
+ const catalog=usePublicCatalog();const data={giving:catalog.giving.map(givingView),events:catalog.events.map(eventView)};const hydrated=!catalog.loading;const [initializedPending,setInitializedPending]=useState<boolean|null>(null);const [selection,setSelection]=useState<DonationSelection|null>(null);const [ready,setReady]=useState(false);const [transaction,setTransaction]=useState('');
+ if(catalog.error)return <div className="container checkout-empty" role="alert"><HandHeart aria-hidden="true"/><h1>Your Donation Summary</h1><p>{catalog.error}</p><button className="button" onClick={()=>void catalog.reload()}>Try Again</button></div>;
  if(hydrated&&initializedPending!==pending){setInitializedPending(pending);const selected=readDonationSelection(new URLSearchParams(window.location.search),data);setSelection(selected);if(selected&&pending)try{const stored=JSON.parse(sessionStorage.getItem(checkoutDraftKey)||'null');if(stored?.selection?.givingSlug===selected.givingSlug&&stored.selection.amountCents===selected.amountCents&&stored.selection.eventSlug===selected.eventSlug&&stored.draft?.method==='bank-transfer'&&typeof stored.draft.transactionReference==='string')setTransaction(stored.draft.transactionReference.trim());}catch{}setReady(true);}
  if(!ready)return <div className="container checkout-empty" role="status"><HandHeart aria-hidden="true"/><h1>Your Donation Summary</h1><p>Preparing your donation preview…</p></div>;
  if(!selection||!readDonationSelection(new URLSearchParams(donationQuery(selection)),data))return <div className="container checkout-empty"><HandHeart aria-hidden="true"/><p className="eyebrow">An offering of seva</p><h1>Choose Your Donation</h1><p>Select a giving opportunity and amount to view your donation summary.</p><PageLink className="button" href="/donate">Choose a Donation</PageLink></div>;

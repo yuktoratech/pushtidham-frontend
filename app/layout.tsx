@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from '../components/auth-provider';
+import { CatalogProvider } from '../components/catalog-provider';
 
 export const metadata: Metadata = {
   title: "Pushthidham Haveli",
@@ -18,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased"><AuthProvider>{children}</AuthProvider></body>
+      <body className="antialiased"><AuthProvider><CatalogProvider>{children}</CatalogProvider></AuthProvider></body>
     </html>
   );
 }

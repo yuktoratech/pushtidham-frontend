@@ -1,5 +1,4 @@
-import { givingOpportunities, type GivingOpportunity } from './giving';
-import { allEvents, type TempleEvent } from './events';
+import type { GivingOpportunity, TempleEvent } from './catalog-ui';
 import { donationQuery, amountMatchesOpportunity, type DonationSelection } from './donation-selection';
 import type { DemoDonor } from './account-demo';
 
@@ -9,20 +8,19 @@ export const checkoutDraftKey='pushthidham-checkout-draft';
 export const emptyDonor:DemoDonor={firstName:'',lastName:'',email:'',phone:''};
 export const bankTransferPreview={bankName:'To be provided by temple',accountName:'To be provided by temple',accountNumber:'To be provided',routingNumber:'To be provided',demoReference:'PHD-DEMO-001'};
 export type DonationCatalog={giving:(GivingOpportunity & {active?:boolean})[];events:TempleEvent[]};
-const defaultCatalog:DonationCatalog={giving:givingOpportunities,events:allEvents};
-export function readDonationSelection(query:URLSearchParams,catalog:DonationCatalog=defaultCatalog):DonationSelection|null{
+export function readDonationSelection(query:URLSearchParams,catalog:DonationCatalog):DonationSelection|null{
   const amount=Number(query.get('amount'));
   if(!Number.isSafeInteger(amount)||amount<=0||query.get('type')!=='one-time')return null;
   const rawChoice=query.get('choice');
   const amountChoice=rawChoice==='custom'?'custom':Number(rawChoice);
   const eventCategory=query.get('category')==='event'||(query.get('category')!=='general'&&query.has('event'));
   if(eventCategory){
-    const event=catalog.events.find(e=>e.slug===query.get('event')&&!e.past);
+    const event=catalog.events.find(e=>e.slug===query.get('event'));
     if(!event||amountChoice!=='custom')return null;
     return {categorySlug:'event',eventSlug:event.slug,eventId:event.id,amountCents:amount,currency:'USD',donationType:'one-time',amountChoice};
   }
   if(query.has('event'))return null;
-  const opportunity=catalog.giving.find(item=>item.slug===query.get('giving')&&item.active!==false);
+  const opportunity=catalog.giving.find(item=>item.slug===query.get('giving')&&item.status==='active');
   if(!opportunity||!amountMatchesOpportunity(opportunity,amountChoice,amount))return null;
   return {categorySlug:'general',givingSlug:opportunity.slug,amountCents:amount,currency:'USD',donationType:'one-time',amountChoice};
 }

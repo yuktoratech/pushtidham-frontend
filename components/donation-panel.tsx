@@ -2,27 +2,30 @@
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { HandHeart, CalendarDays, Landmark, FileText } from 'lucide-react';
-import { useAdminDemo } from '../hooks/use-admin-demo';
 import { readDonationSelection } from '../lib/checkout';
-import type { GivingOpportunity } from '../lib/giving';
-import type { TempleEvent } from '../lib/events';
+import type { GivingOpportunity, TempleEvent } from '../lib/catalog-ui';
 import { allowsCustom, allowsFixed, amountMatchesOpportunity, checkoutPath, donationCurrency, donationSelectionKey, parseCustomAmount, type DonationSelection } from '../lib/donation-selection';
+import { usePublicCatalog } from './catalog-provider';
+import { eventView, givingView } from '../lib/catalog-ui';
+import { centsToUsdInput } from '../lib/money';
 
 type PanelProps={opportunity?:GivingOpportunity;event?:TempleEvent};
 export function DonationPanel({opportunity,event}:PanelProps){
-  const {data,ready}=useAdminDemo();
+  const {giving,events,loading}=usePublicCatalog();
+  const data={giving:giving.map(givingView),events:events.map(eventView)};
+  const ready=!loading;
   const initial=ready?readDonationSelection(new URLSearchParams(window.location.search),data):null;
-  const key=`${ready}:${event?'event':'general'}:${event?.slug||opportunity?.slug}:${opportunity?.amountType}:${opportunity?.suggestedAmounts.join(',')}`;
+  const key=`${ready}:${event?'event':'general'}:${event?.slug||opportunity?.slug}:${opportunity?.amountTypeUi}:${opportunity?.suggestedAmounts.join(',')}`;
   const matches=event?initial?.categorySlug==='event'&&initial.eventSlug===event.slug:initial?.categorySlug==='general'&&initial.givingSlug===opportunity?.slug;
   return <DonationAmountForm key={key} opportunity={opportunity} event={event} initial={matches?initial:null}/>;
 }
 
 function DonationAmountForm({opportunity,event,initial}:PanelProps & {initial:DonationSelection|null}){
-  const config=opportunity||{amountType:'custom' as const,suggestedAmounts:[]};
-  const fixed=allowsFixed(config.amountType);
-  const customAllowed=allowsCustom(config.amountType);
+  const config=opportunity||{amountTypeUi:'custom' as const,suggestedAmounts:[]};
+  const fixed=allowsFixed(config.amountTypeUi);
+  const customAllowed=allowsCustom(config.amountTypeUi);
   const [choice,setChoice]=useState<number|'custom'>(initial?.amountChoice??(fixed?config.suggestedAmounts[0]:'custom'));
-  const [custom,setCustom]=useState(initial?.amountChoice==='custom'?(initial.amountCents/100).toFixed(2):'');
+  const [custom,setCustom]=useState(initial?.amountChoice==='custom'?centsToUsdInput(initial.amountCents):'');
   const [touched,setTouched]=useState(false);
   const customRef=useRef<HTMLInputElement>(null);
   const parsed=choice==='custom'?parseCustomAmount(custom):parseCustomAmount(String(choice));

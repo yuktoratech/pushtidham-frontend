@@ -1,3 +1,5 @@
+import { formatUsd } from './money';
+
 export type DemoDonor = {firstName:string;lastName:string;email:string;phone:string};
 // Contact attached only to shared sample donation records; never an authenticated identity.
 export const sampleDonationDonorEmail = 'donor@pushthidham.org';
@@ -19,7 +21,7 @@ export const demoDonations: DemoDonation[] = [
   {reference:'PH-2026-0731-0614',date:'2026-07-31',givingFor:'Prasad Seva',amountCents:2500,method:'PayPal',status:'Rejected'},
   {reference:'PH-2026-0625-0489',date:'2026-06-25',givingFor:'Annakut Mahotsav',amountCents:10100,method:'PayPal',status:'Completed'},
 ];
-export function formatDonationAmount(amountCents:number){return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(amountCents/100);}
+export function formatDonationAmount(amountCents:number){return formatUsd(amountCents);}
 export function formatDonationDate(date:string){return new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'}).format(new Date(`${date}T12:00:00Z`));}
 export const demoCompletedDonations = demoDonations.filter(donation=>donation.status==='Completed');
 export const demoTotalGivenCents = demoCompletedDonations.reduce((sum,donation)=>sum+donation.amountCents,0);

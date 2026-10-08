@@ -1,5 +1,4 @@
 'use client';
-import { useAdminDemo } from '../hooks/use-admin-demo';
 import { PageLink } from './page-link';
 
 import { useRouter } from 'next/navigation';
@@ -11,9 +10,11 @@ import {useAuth} from './auth-provider';
 import {userContact} from '../lib/auth-state';
 import { checkoutPath, donationQuery, donationCurrency, donationSelectionKey, type DonationSelection } from '../lib/donation-selection';
 import { bankTransferPreview, checkoutDraftKey, editDonationPath, emptyDonor, donationContext, readDonationSelection, validateCheckout, type CheckoutDraft, type PaymentMethod } from '../lib/checkout';
+import { usePublicCatalog } from './catalog-provider';
+import { eventView, givingView } from '../lib/catalog-ui';
 
 function DonationSummary({selection}:{selection:DonationSelection}){
-  const {data}=useAdminDemo();
+  const catalog=usePublicCatalog();const data={giving:catalog.giving.map(givingView),events:catalog.events.map(eventView)};
   const opportunity=donationContext(selection,data);
   const event=opportunity.event;
   return <aside className="checkout-summary" aria-labelledby="summary-title"><div className="checkout-summary-image"><img src={opportunity.image} alt={opportunity.imageAlt}/><span><HandHeart aria-hidden="true"/>Your offering of seva</span></div><div className="checkout-summary-content"><p className="eyebrow">A meaningful contribution</p><h2 id="summary-title">Donation Summary</h2><dl><div><dt>{opportunity.category==='Event'?'Event':'Giving for'}</dt><dd>{opportunity.title}</dd></div><div><dt>Category</dt><dd>{opportunity.category}</dd></div><div><dt>Amount</dt><dd>{donationCurrency(selection.amountCents)}{selection.amountChoice==='custom'&&<small>Custom amount</small>}</dd></div><div><dt>Donation type</dt><dd>One-Time</dd></div>{event&&<div className="checkout-event"><dt><CalendarDays aria-hidden="true"/>Event identifier</dt><dd>{event.id}</dd></div>}</dl><div className="checkout-total"><span>Donation Total</span><strong>{donationCurrency(selection.amountCents)}<small>USD</small></strong></div><PageLink className="checkout-edit" href={editDonationPath(selection)}><Pencil aria-hidden="true"/>Edit donation amount</PageLink><p className="checkout-summary-note">Your contribution supports the seva and community of Pushthidham Haveli.</p></div></aside>;
@@ -24,7 +25,7 @@ function BankTransfer({reference,onChange,onBlur,error}:{reference:string;onChan
 export function Checkout(){
   const router=useRouter();const {user}=useAuth();const [prefilledUser,setPrefilledUser]=useState<string|null>(null);
   const [selection,setSelection]=useState<DonationSelection|null>(null);
-  const {data,ready:hydrated}=useAdminDemo();const [ready,setReady]=useState(false);
+  const catalog=usePublicCatalog();const data={giving:catalog.giving.map(givingView),events:catalog.events.map(eventView)};const hydrated=!catalog.loading;const [ready,setReady]=useState(false);
   const [donor,setDonor]=useState<DemoDonor>({...emptyDonor});
   const [donorMode,setDonorMode]=useState<'guest'|'demo'>('guest');
   const [method,setMethod]=useState<PaymentMethod>('paypal');
@@ -51,6 +52,7 @@ export function Checkout(){
   function field(field:keyof DemoDonor,label:string,autoComplete:string){return {id:`checkout-${field}`,label,value:donor[field],autoComplete,onChange:(value:string)=>update(field,value),onBlur:()=>{if(attempted||donor[field])setErrors(prev=>({...prev,[field]:validateCheckout(donor,method,reference)[field]}));},error:errors[field]};}
   function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();setAttempted(true);const next=validateCheckout(donor,method,reference);setErrors(next);const first=Object.keys(next)[0];if(first){form.current?.querySelector<HTMLElement>(`#checkout-${first}`)?.focus();return;}setStage('review');}
   function switchMode(mode:'guest'|'demo'){if(mode==='demo'&&!user){if(selection)router.push(`/login?returnTo=${encodeURIComponent(checkoutPath(selection)+'&returnAccount=1')}`);return;}setDonorMode(mode);setDonor(mode==='demo'?userContact(user):{...emptyDonor});setErrors({});setAttempted(false);}
+  if(catalog.error)return <div className="container checkout-empty" role="alert"><HandHeart aria-hidden="true"/><h1>Donation Checkout</h1><p>{catalog.error}</p><button className="button" onClick={()=>void catalog.reload()}>Try Again</button></div>;
   if(!ready)return <div className="container checkout-empty" role="status"><HandHeart aria-hidden="true"/><h1>Donation Checkout</h1><p>Preparing your offering of seva…</p></div>;
   if(!selection||!readDonationSelection(new URLSearchParams(donationQuery(selection)),data))return <div className="container checkout-empty"><HandHeart aria-hidden="true"/><p className="eyebrow">Your offering of seva</p><h1>Choose Your Donation</h1><p>Select a giving opportunity and an amount to begin your donation.</p><PageLink className="button" href="/donate">Choose a Donation</PageLink></div>;
   const opportunity=donationContext(selection,data);

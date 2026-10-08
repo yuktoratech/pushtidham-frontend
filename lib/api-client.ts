@@ -77,6 +77,11 @@ async function send<T>(
     data?: T;
     error?: { code?: string; message?: string; details?: ApiIssue[] };
   };
+  if (response.status === 204) {
+    if (!response.ok)
+      throw new ApiError(response.status, "API_ERROR", "The request could not be completed.");
+    return undefined as T;
+  }
   try {
     payload = await response.json();
   } catch {
