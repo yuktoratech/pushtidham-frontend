@@ -183,6 +183,29 @@ export const authApi = {
     send<null>("/auth/logout", { method: "POST", body: "{}" }, null),
   me: () => apiRequest<AuthUser>("/auth/me"),
 };
+export type PaymentMethodFamily = "card" | "ach";
+export type PaymentAttemptStatus = "created" | "requires_action" | "verification_pending" | "processing" | "succeeded" | "failed" | "canceled";
+export type PaymentStart = { attemptId:string; status:PaymentAttemptStatus; baseDonationCents:number; feeContributionCents:number; totalChargeCents:number; currency:"USD"; statusToken?:string; checkoutUrl?:string; orderId?:string; approvalUrl?:string };
+export type PaymentStatus = { id:string; status:PaymentAttemptStatus; baseDonationCents:number; feeContributionCents:number; totalChargeCents:number; currency:"USD" };
+export type PaymentCapabilities = {stripe:{card:boolean;ach:boolean};paypal:{enabled:boolean;clientId?:string;environment:"sandbox"|"live";venmo:boolean}};
+export const paymentApi={
+ capabilities:()=>apiRequest<PaymentCapabilities>("/payments/capabilities"),
+ stripe:(body:object,key:string)=>apiRequest<PaymentStart>("/payments/stripe/checkout-sessions",{method:"POST",headers:{"Idempotency-Key":key},body:JSON.stringify(body)}),
+ paypalOrder:(body:object,key:string)=>apiRequest<PaymentStart>("/payments/paypal/orders",{method:"POST",headers:{"Idempotency-Key":key},body:JSON.stringify(body)}),
+ paypalCapture:(orderId:string,token?:string)=>apiRequest<{attemptId:string;status:string}>(`/payments/paypal/orders/${encodeURIComponent(orderId)}/capture`,{method:"POST",headers:token?{"X-Payment-Status-Token":token}:undefined,body:"{}"}),
+ status:(attemptId:string,token?:string)=>apiRequest<PaymentStatus>(`/payments/attempts/${encodeURIComponent(attemptId)}/status`,{headers:token?{"X-Payment-Status-Token":token}:undefined}),
+};
+export type DonationDisplayStatus="created"|"requires_action"|"verification_required"|"processing"|"succeeded"|"failed"|"canceled"|"pending"|"completed"|"refunded"|"partially_refunded"|"returned"|"disputed";
+export type DonationRecord={id:string;donationNumber:string;type:"general"|"event";designationTitle:string;baseDonationCents:number;feeContributionCents:number|null;grossChargedCents:number|null;actualProviderFeeCents:number|null;adjustmentLossCents:number;netProceedsCents:number|null;currency:"USD";paymentProvider:"stripe"|"paypal"|null;paymentMethod:string;paymentLifecycle:PaymentAttemptStatus|null;displayStatus:DonationDisplayStatus;donationStatus:"pending"|"completed"|"rejected";recordKind:"verified_online"|"legacy_paypal"|"legacy_bank_transfer"|"legacy_online"|"offline";providerVerified:boolean;createdAt:string;completedAt?:string;donor?:{name:string;email:string;phone:string|null};references?:{external:string|null;bank:string|null;offline:string|null;payment:string|null};adjustments?:Array<{type:string;status:string;amountCents:number;occurredAt:string;reasonCode:string|null;providerReference:string}>};
+export type FinancialReport={timezone:"UTC";range:{from:string|null;to:string|null};summary:{records:number;confirmedRecords:number;confirmedBaseCents:number;feeContributionCents:number;grossConfirmedCents:number;knownProviderFeesCents:number;unknownProviderFeeRecords:number;adjustmentLossCents:number;netProceedsKnownCents:number;netUnknownRecords:number;pendingBaseCents:number;failedCanceledBaseCents:number};providers:Array<{provider:string;records:number;baseDonationCents:number;grossChargedCents:number;adjustmentLossCents:number}>;designations:Array<{designation:string;records:number;baseDonationCents:number;grossChargedCents:number}>};
+export const donationApi={
+ list:(query="")=>apiRequest<DonationRecord[]>(`/donations${query?`?${query}`:""}`),
+ adminList:(query="")=>apiRequest<DonationRecord[]>(`/admin/donations${query?`?${query}`:""}`),
+ adminGet:(id:string)=>apiRequest<DonationRecord>(`/admin/donations/${encodeURIComponent(id)}`),
+ createOffline:(body:object)=>apiRequest<DonationRecord>("/admin/donations/offline",{method:"POST",body:JSON.stringify(body)}),
+ setOfflineStatus:(id:string,status:"completed"|"rejected",adminNote?:string)=>apiRequest<DonationRecord>(`/admin/donations/${encodeURIComponent(id)}/status`,{method:"PATCH",body:JSON.stringify({status,...(adminNote?{adminNote}:{})})}),
+ report:(query="")=>apiRequest<FinancialReport>(`/admin/reports/financial${query?`?${query}`:""}`),
+};
 export function authErrorMessage(error: unknown) {
   if (error instanceof ApiError) {
     if (error.code === "INVALID_CREDENTIALS")

@@ -17,7 +17,25 @@ Production build: `npm run build`. Next.js writes the production build to `.next
 2. Connect the GitHub repository to Vercel.
 3. Import that repository into Vercel.
 4. Select Next.js as the framework, the folder containing package.json as Root Directory, Node.js 22.x, and npm run build as Build Command. Keep Output Directory at its framework default.
-5. Deploy. Configure NEXT_PUBLIC_API_URL and the backend permitted frontend origin before using authentication. Payments remain a demo.
+5. Deploy. Configure NEXT_PUBLIC_API_URL and the backend permitted frontend origin before using authentication or payments.
+
+## Phase 4D-1 payment checkout
+
+The browser fetches `/api/v1/payments/capabilities`; no PayPal secret is stored in the frontend. The backend returns the public PayPal client ID, environment, and explicit merchant Venmo enablement. PayPal JavaScript SDK v6 is loaded once and uses provider eligibility before rendering PayPal Wallet or Venmo. Venmo remains a PayPal funding source and is absent unless both backend configuration and SDK eligibility allow it.
+
+PayPal and Venmo buttons create orders through the backend, and approval calls the backend capture endpoint with either the authenticated session or the browser-scoped guest status token. The token stays in `sessionStorage`, never in a URL. Frontend capture is guarded per order, checks authoritative status first, and records requested/uncertain state so repeated callbacks or return-page refreshes do not blindly recapture. The existing PayPal approval URL is retained as a redirect fallback; its return handler requires the returned order ID to exactly match the browser-scoped pending order.
+
+Set private `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, and other PayPal settings only on the backend. The client ID is public by design and is exposed only through the capabilities response when PayPal is enabled and initialized. `PAYPAL_VENMO_ENABLED=true` signals merchant enablement but does not override SDK eligibility. If configuration or browser support is missing, checkout shows an unavailable message and donors can choose another method.
+
+Automated tests use mocked/browser-contract flows only. A real PayPal sandbox buyer approval, mobile app-switch/return, webhook delivery, and merchant-ledger verification still require valid operator-supplied sandbox credentials. Responsive browser QA results should be recorded for each release environment.
+
+## Phase 4D-2 donation history and reporting
+
+Authenticated donor history comes from `GET /api/v1/donations` and is restricted by backend user ownership; guest gifts are never attached by matching email. History exposes designation, UTC date, base donation, payment method, record class, and authoritative lifecycle. ACH verification and processing remain pending rather than confirmed income. This phase does not generate receipts.
+
+Admin donation list/detail/offline controls use `/api/v1/admin/donations`. Provider-backed online donations cannot be manually completed; only pending offline records retain admin completion/rejection controls. Admin financial reporting uses `/api/v1/admin/reports/financial` with validated UTC date ranges and provider filters.
+
+Reports keep base donation, optional fee contribution, gross charge, actual provider fee, verified financial adjustments, and net proceeds separate. Successful refunds, ACH returns, and lost disputes reduce retained proceeds; successful reversals offset prior losses without producing a negative adjustment. Missing provider fees and net proceeds remain unknown rather than zero. Verified Stripe/PayPal, legacy PayPal, legacy bank transfer, and offline records have separate classifications. Report accuracy depends on verified webhooks and reconciliation jobs remaining operational.
 
 ## Real authentication on backend-integration
 

@@ -2,9 +2,14 @@ import type { GivingOpportunity, TempleEvent } from './catalog-ui';
 import { donationQuery, amountMatchesOpportunity, type DonationSelection } from './donation-selection';
 import type { DemoDonor } from './account-demo';
 
-export type PaymentMethod = 'paypal' | 'bank-transfer';
+export type PaymentMethod = 'card' | 'ach' | 'paypal' | 'venmo' | 'bank-transfer';
 export type CheckoutDraft = {donor:DemoDonor;method:PaymentMethod;transactionReference:string;donorMode:'guest'|'demo'};
 export const checkoutDraftKey='pushthidham-checkout-draft';
+export const pendingPaymentKey='pushthidham-pending-payment';
+export type PendingPayment={attemptId:string;statusToken?:string;provider:'stripe'|'paypal';orderId?:string;createdAt:number;captureState?:'not_requested'|'requested'|'resolved'|'uncertain'};
+export function savePendingPayment(value:PendingPayment){sessionStorage.setItem(pendingPaymentKey,JSON.stringify(value));}
+export function readPendingPayment(){try{return JSON.parse(sessionStorage.getItem(pendingPaymentKey)||'null') as PendingPayment|null}catch{return null}}
+export function newIdempotencyKey(){return `checkout-${crypto.randomUUID()}`;}
 export const emptyDonor:DemoDonor={firstName:'',lastName:'',email:'',phone:''};
 export const bankTransferPreview={bankName:'To be provided by temple',accountName:'To be provided by temple',accountNumber:'To be provided',routingNumber:'To be provided',demoReference:'PHD-DEMO-001'};
 export type DonationCatalog={giving:(GivingOpportunity & {active?:boolean})[];events:TempleEvent[]};
@@ -30,7 +35,7 @@ export function donationContext(selection:DonationSelection,catalog:DonationCata
     return {...event,category:'Event' as const,event};
   }
   const giving=catalog.giving.find(g=>g.slug===selection.givingSlug)!;
-  return {...giving,category:'General' as const,event:undefined};
+  return {...giving,id:giving._id,category:'General' as const,event:undefined};
 }
 
 export function editDonationPath(selection:DonationSelection){return `/donate?${donationQuery(selection)}`;}
