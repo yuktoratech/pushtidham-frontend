@@ -1,17 +1,13 @@
-// Replace unconfirmed fields only with temple-approved contact information.
 export const templeContact = {
-  name: 'Pushthidham Haveli',
+  name: 'Pushtidham Haveli',
+  organization: 'Pushti Margiya Vaishnav Samaj Inc.',
   locality: 'Ocala, Florida, USA',
-  address: null as string | null,
-  phone: null as string | null,
-  email: null as string | null,
-  hours: null as string | null,
-  mapsUrl: null as string | null,
+  address: '14080 SW 20th Avenue Road, Ocala, FL 34473',
+  phone: '+1 (352) 307-0065',
+  phoneHref: '+13523070065',
+  email: 'Pushtidham2020@yahoo.com',
+  federalId: '27-2487275',
+  visitingNote: 'Darshan times may vary during special events and occasions. Please call before visiting.',
+  mapsUrl: 'https://www.google.com/maps/search/?api=1&query=14080%20SW%2020th%20Avenue%20Road%2C%20Ocala%2C%20FL%2034473',
   image: '/images/haveli-about.webp',
-  unconfirmed: {
-    address: 'Street address to be confirmed',
-    phone: 'Contact number to be confirmed',
-    email: 'Email address to be confirmed',
-    hours: 'Darshan hours to be confirmed',
-  },
 };

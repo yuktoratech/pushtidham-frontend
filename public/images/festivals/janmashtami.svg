@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" role="img" aria-labelledby="title desc">
+  <title id="title">Janmashtami decorative illustration</title><desc id="desc">A moon, flute and peacock feather in green, cream and gold.</desc>
+  <defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#082f25"/><stop offset="1" stop-color="#176044"/></linearGradient><radialGradient id="moon"><stop stop-color="#fff9dd"/><stop offset="1" stop-color="#e9c979"/></radialGradient></defs>
+  <rect width="800" height="480" fill="url(#bg)"/><circle cx="122" cy="104" r="72" fill="url(#moon)" opacity=".95"/><circle cx="151" cy="83" r="69" fill="#0d4936"/>
+  <g fill="none" stroke="#d7b45f" stroke-width="15" stroke-linecap="round"><path d="M170 338 646 142"/><path d="m214 322 22 48m78-88 22 48m78-88 22 48m78-88 22 48m65-87 22 48"/></g>
+  <g transform="translate(604 72) rotate(19)"><path d="M0 144C-42 91-25 24 34 0c51 34 56 104 11 145Z" fill="#2b8e78" stroke="#d7b45f" stroke-width="8"/><ellipse cx="23" cy="64" rx="22" ry="34" fill="#155a83"/><circle cx="23" cy="64" r="11" fill="#d7b45f"/><path d="M26 142 5 222" stroke="#d7b45f" stroke-width="8"/></g>
+  <g fill="#f6e6ae" opacity=".65"><circle cx="84" cy="390" r="4"/><circle cx="702" cy="368" r="5"/><circle cx="733" cy="93" r="4"/><circle cx="322" cy="83" r="3"/></g>
+</svg>

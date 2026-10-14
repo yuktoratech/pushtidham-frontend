@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" role="img" aria-labelledby="title desc">
+  <title id="title">Pavitra Ekadashi decorative illustration</title><desc id="desc">A sacred golden thread forms a circle around a lotus.</desc>
+  <defs><radialGradient id="bg"><stop stop-color="#1e684b"/><stop offset="1" stop-color="#082f25"/></radialGradient></defs><rect width="800" height="480" fill="url(#bg)"/>
+  <circle cx="400" cy="236" r="156" fill="none" stroke="#d7b45f" stroke-width="14" stroke-dasharray="8 12"/><circle cx="400" cy="236" r="180" fill="none" stroke="#f4e4ae" stroke-width="3" opacity=".65"/>
+  <g transform="translate(400 274)" fill="#e3c36c" stroke="#fff2c9" stroke-width="4"><ellipse rx="48" ry="110" transform="rotate(0)"/><ellipse rx="48" ry="110" transform="rotate(48)"/><ellipse rx="48" ry="110" transform="rotate(96)"/><ellipse rx="48" ry="110" transform="rotate(144)"/></g><circle cx="400" cy="274" r="43" fill="#fff0b8"/>
+  <path d="M326 103q74-62 148 0" fill="none" stroke="#d7b45f" stroke-width="11" stroke-linecap="round"/><circle cx="326" cy="103" r="13" fill="#f4e4ae"/><circle cx="474" cy="103" r="13" fill="#f4e4ae"/>
+</svg>

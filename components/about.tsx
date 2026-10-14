@@ -29,17 +29,17 @@ export function AboutContent() {
       <div className="about-temple-introduction">
         <div className="about-temple-copy">
           <p className="eyebrow">A place of devotion and belonging</p>
-          <h2 id="temple-title">Hindu Pushthidham Temple</h2>
-          <p>Pushthidham Haveli is a spiritual home where faith, devotion and community come together. Rooted in the traditions of Pushtimarg, we celebrate devotion to Shri Krishna through darshan, seva and the joy of shared worship.</p>
-          <p>We are dedicated to preserving our rich traditions, nurturing spiritual connections and bringing families together. Through devotional gatherings, festivals and opportunities to serve, we share the values of Bhakti and Sanskar with the next generation.</p>
-          <p>Whether you come to pray, learn or offer your seva, you are welcome here.</p>
+          <h2 id="temple-title">Pushtidham Haveli</h2>
+          <p>Pushtidham Haveli is the spiritual and community home of Pushti Margiya Vaishnav Samaj Inc. in Ocala, Florida. Rooted in Pushtimarg—the Path of Grace—the Haveli brings devotees together in loving devotion to Shri Krishna and Shrinathji.</p>
+          <p>Pushtimarg was established by Jagadguru Shrimad Vallabhacharya Mahaprabhuji. Its devotional life is expressed through seva, darshan, kirtan and the traditions of raag, bhog, vastra and shringar.</p>
+          <p>Devotees, families and visitors are welcome to pray, learn, participate and serve.</p>
         </div>
         <div className="about-spiritual-detail" aria-hidden="true"><Flower2/><span>श्री कृष्ण शरणं मम</span><small>SHRI KRISHNA SHARANAM MAMA</small></div>
       </div>
       <div className="about-information-grid">
-        <InformationCard icon={HandHeart} title="Our Mission">To inspire devotion and serve our community through worship, seva and spiritual learning.</InformationCard>
-        <InformationCard icon={HeartHandshake} title="Our Values">Faith, seva, culture and togetherness guide the way we worship, serve and care for one another.</InformationCard>
-        <InformationCard icon={UsersRound} title="Our Community">A welcoming place for devotees and families to connect, celebrate and grow together.</InformationCard>
+        <InformationCard icon={HandHeart} title="Devotion and Seva">Religious services, festivals and spiritual discourse support a life of selfless devotion, humility and loving seva.</InformationCard>
+        <InformationCard icon={HeartHandshake} title="Learning and Culture">Education in Pushtimarg, Hindu traditions, Indian culture and the arts helps families share enduring values with future generations.</InformationCard>
+        <InformationCard icon={UsersRound} title="Community and Service">The Samaj encourages belonging, volunteerism, interfaith harmony and responsible support for people and humanitarian causes.</InformationCard>
       </div>
       <div className="about-closing-message"><span className="about-ornament" aria-hidden="true">❧</span><blockquote>“Seva, Bhakti and Sanskar for a Brighter Tomorrow”</blockquote><span className="about-ornament" aria-hidden="true">❧</span></div>
     </section>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" role="img" aria-labelledby="title desc">
+  <title id="title">Hindola Utsav decorative illustration</title><desc id="desc">A decorated swing framed by leaves and flowers.</desc>
+  <defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#f8edd2"/><stop offset="1" stop-color="#e8d29d"/></linearGradient></defs><rect width="800" height="480" fill="url(#bg)"/>
+  <g fill="none" stroke="#145439" stroke-width="18" stroke-linecap="round"><path d="M153 423V114h494v309"/><path d="M255 124v196m290-196v196"/><path d="M216 320h368l-39 79H255Z"/></g>
+  <path d="M126 111q274-128 548 0" fill="none" stroke="#a78039" stroke-width="10"/>
+  <g fill="#d7a83f"><circle cx="169" cy="94" r="20"/><circle cx="238" cy="66" r="18"/><circle cx="314" cy="48" r="20"/><circle cx="400" cy="42" r="22"/><circle cx="486" cy="48" r="20"/><circle cx="562" cy="66" r="18"/><circle cx="631" cy="94" r="20"/></g>
+  <g fill="#4e8a5b"><path d="m188 90-42-46q62-3 42 46"/><path d="m286 57-29-51q57 11 29 51"/><path d="m514 57 29-51q-57 11-29 51"/><path d="m612 90 42-46q-62-3-42 46"/></g>
+</svg>

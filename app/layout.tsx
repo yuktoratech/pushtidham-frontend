@@ -4,8 +4,8 @@ import { AuthProvider } from '../components/auth-provider';
 import { CatalogProvider } from '../components/catalog-provider';
 
 export const metadata: Metadata = {
-  title: "Pushthidham Haveli",
-  description: "A place of devotion, seva and community. Discover Pushthidham Haveli.",
+  title: "Pushtidham Haveli",
+  description: "A place of devotion, seva and community in Ocala, Florida. Discover Pushtidham Haveli.",
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
