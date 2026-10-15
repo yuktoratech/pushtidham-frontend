@@ -1,5 +1,7 @@
 'use client';
 
+import {clientDemoPaymentsDeferred,PaymentDemoNotice} from './payment-demo-notice';
+import {isDevelopmentEvent,EventSampleNotice} from './event-sample-notice';
 import { useEffect, useMemo, useState } from 'react';
 import { ChevronRight, HandHeart, Info } from 'lucide-react';
 import { eventDate, eventView, givingView } from '../lib/catalog-ui';
@@ -40,11 +42,11 @@ export function Donate(){
   return <div className="donate-page">
     <nav className="container giving-detail-breadcrumb" aria-label="Breadcrumb"><PageLink href="/">Home</PageLink><ChevronRight aria-hidden="true"/><PageLink href="/giving">Giving</PageLink><ChevronRight aria-hidden="true"/><span aria-current="page">Donate</span></nav>
     <div className="container"><header className="checkout-heading"><div><p className="eyebrow">An offering of seva</p><h1>Make a Donation</h1><p>Choose your offering and amount before continuing to checkout.</p></div><span className="checkout-preview"><Info aria-hidden="true"/>Frontend preview · no payment is taken</span></header>
-      {notice&&<p className="account-demo-notice" role="status">{notice}</p>}
+      {clientDemoPaymentsDeferred&&<PaymentDemoNotice/>}{notice&&<p className="account-demo-notice" role="status">{notice}</p>}
       <div className="donate-selection-grid"><section className="checkout-panel donate-option-panel" aria-labelledby="donate-option-title"><div className="checkout-panel-heading"><HandHeart aria-hidden="true"/><div><p className="eyebrow">Your offering</p><h2 id="donate-option-title">Donation Details</h2></div></div>
         <div className="auth-field"><label htmlFor="donate-category">Category</label><select id="donate-category" value={category} onChange={e=>{const next=e.target.value as DonationCategory;choose(next,next==='General'?defaultGiving:events[0]?.slug||'');}}><option>General</option><option>Event</option></select></div>
         <div className="auth-field"><label htmlFor="donate-for">Donation For</label><select id="donate-for" value={current?.slug||''} disabled={!options.length} onChange={e=>choose(category,e.target.value)}>{!options.length&&<option value="">No available {category==='General'?'giving items':'events'}</option>}{options.map(item=><option key={item.slug} value={item.slug}>{item.title}{category==='Event'?` — ${eventDate(events.find(e=>e.slug===item.slug)!.startsAt)}`:''}</option>)}</select></div>
-        <p className="donate-description">{opportunity?.shortDescription||event?.description||'Please return when a donation option is available.'}</p>
+        {event&&isDevelopmentEvent(event)&&<EventSampleNotice/>}<p className="donate-description">{opportunity?.shortDescription||event?.description||'Please return when a donation option is available.'}</p>
         <p className="checkout-demo-note">Your selected {category==='General'?'giving item':'event'} and amount will be carried into the donation summary. Guest and signed-in account checkout are available.</p>
       </section>{current&&<DonationPanel opportunity={opportunity} event={event}/>}</div>
     </div>

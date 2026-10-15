@@ -55,6 +55,6 @@ function DonationAmountForm({opportunity,event,initial}:PanelProps & {initial:Do
       <div className="donation-total"><span>Your contribution</span><strong>{valid?donationCurrency(parsed.cents!):'Choose an amount'}<small>USD</small></strong></div>
       <button type="submit" className="button donation-continue" disabled={!valid}>Continue to Checkout</button><p className="donation-payment-note">No payment is taken when choosing an amount.</p>
     </form>
-    <div className="donation-trust"><div><Landmark aria-hidden="true"/><p>Your contribution supports Pushthidham Haveli.</p></div><div><FileText aria-hidden="true"/><p>A receipt is provided after a successful donation.</p></div></div>
+    <div className="donation-trust"><div><Landmark aria-hidden="true"/><p>Your contribution supports Pushthidham Haveli.</p></div><div><FileText aria-hidden="true"/><p>No receipt is issued for a donation preview.</p></div></div>
   </aside>;
 }

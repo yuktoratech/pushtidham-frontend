@@ -5,8 +5,8 @@ export const emptyAuthValues: AuthValues = {firstName:'',lastName:'',email:'',ph
 export const authCopy = {
   login: {title:'Welcome Back',subtitle:'Connect with your donor account.',button:'Login'},
   register: {title:'Create Account',subtitle:'Join our community of devotion and seva.',button:'Create Account'},
-  'forgot-password': {title:'Forgot Password?',subtitle:'We’ll help you find your way back to your account.',button:'Send Reset Link'},
-  'reset-password': {title:'Reset Password',subtitle:'Choose a new password for your donor account.',button:'Reset Password'},
+  'forgot-password': {title:'Forgot Password?',subtitle:'We’ll help you find your way back to your account.',button:'Preview Reset Request'},
+  'reset-password': {title:'Reset Password',subtitle:'Choose a new password for your donor account.',button:'Check Password Preview'},
 };
 export const passwordRequirements = 'Use at least 8 characters, including a letter and a number.';
 export const registrationPasswordRequirements = 'Use 12–72 characters, with no more than 72 UTF-8 bytes.';

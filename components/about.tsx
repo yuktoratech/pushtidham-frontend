@@ -1,3 +1,4 @@
+import {CatalogImage} from './catalog-image';
 import { PageLink } from './page-link';
 import type { LucideIcon } from 'lucide-react';
 import { ChevronRight, Flower2, HandHeart, HeartHandshake, UsersRound } from 'lucide-react';
@@ -5,7 +6,7 @@ import { ChevronRight, Flower2, HandHeart, HeartHandshake, UsersRound } from 'lu
 export function AboutHero() {
   return (
     <section className="about-page-hero" aria-labelledby="about-title">
-      <img src="/images/haveli-about.webp" alt="Haveli architectural artwork with carved arches, domes and a tranquil garden" />
+      <CatalogImage src="/images/haveli-about.webp" alt="Haveli architectural artwork with carved arches, domes and a tranquil garden" />
       <div className="about-page-hero-shade" />
       <div className="container about-page-hero-content">
         <h1 id="about-title">About Us</h1>

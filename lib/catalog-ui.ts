@@ -1,3 +1,4 @@
+import {eventTime,templeTimeZone} from './event-time';
 import { ApiError } from './api-client';
 import type { EventRecord, GivingAmountType, GivingRecord } from './catalog-api';
 import { centsToUsd } from './money';
@@ -35,8 +36,8 @@ export type TempleEvent = EventRecord & {
 export function givingView(record: GivingRecord): GivingOpportunity {
   return {
     ...record,
-    shortDescription: record.description,
-    fullDescription: record.description,
+    shortDescription: record.description || 'Choose an amount to support this offering.',
+    fullDescription: record.description || 'Please contact the Haveli for details about this offering.',
     image: '/images/diya.webp',
     imageAlt: '',
     suggestedAmounts: record.fixedAmountsCents.map(centsToUsd),
@@ -52,7 +53,7 @@ export function eventView(record: EventRecord): TempleEvent {
     ...record,
     id: record._id,
     date: record.startsAt,
-    time: new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }).format(starts),
+    time: eventTime(record.startsAt),
     past: starts.getTime() < Date.now(),
     venue: record.location,
     image: record.image || '/images/devotional-hero.webp',
@@ -62,7 +63,7 @@ export function eventView(record: EventRecord): TempleEvent {
 }
 
 export function eventDate(value: string) {
-  return new Intl.DateTimeFormat('en-US', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(value));
+  return new Intl.DateTimeFormat('en-US', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: templeTimeZone }).format(new Date(value));
 }
 
 export function catalogErrorMessage(error: unknown) {
