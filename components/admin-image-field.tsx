@@ -12,7 +12,7 @@ const allowedTypes=new Set(['image/jpeg','image/png','image/webp']);
 function uploadError(error:unknown){
   if(error instanceof ApiError){
     if(error.status===413)return 'The image is too large. Choose a file no larger than 8 MiB.';
-    if(error.code==='IMAGE_STORAGE_UNAVAILABLE')return 'Image uploads are not configured on the server. You can still use an existing image URL.';
+    if(error.code==='IMAGE_STORAGE_UNAVAILABLE')return 'Image uploads are not configured on the server. Please ask an administrator to configure image storage.';
     return error.message;
   }
   return 'The image could not be uploaded. Your other form values are unchanged.';
@@ -53,7 +53,7 @@ export function AdminImageField({kind,value,onChange,temporaryUrl,onTemporaryCha
       if(previous&&previous!==uploaded.url){
         try{await catalogApi.deleteUploadedImage(previous);}catch{/* Best-effort cleanup; record save is still safe. */}
       }
-    }catch(reason){setError(uploadError(reason));}
+    }catch(reason){setPreview('');if(objectUrl.current){URL.revokeObjectURL(objectUrl.current);objectUrl.current='';}setError(uploadError(reason));}
     finally{setBusy(false);}
   }
   async function remove(){
@@ -66,14 +66,6 @@ export function AdminImageField({kind,value,onChange,temporaryUrl,onTemporaryCha
     }
     onChange('');
   }
-  function urlChanged(next:string){
-    setError('');setMessage('');setPreview('');
-    if(temporaryUrl&&next!==temporaryUrl){
-      void catalogApi.deleteUploadedImage(temporaryUrl).catch(()=>{});
-      onTemporaryChange(undefined);
-    }
-    onChange(next);
-  }
   const shown=preview||value;
   return <fieldset className="adm-image-field adm-field-wide" disabled={disabled||uploading}>
     <legend>Catalog image</legend>
@@ -83,7 +75,6 @@ export function AdminImageField({kind,value,onChange,temporaryUrl,onTemporaryCha
       {value&&<button type="button" className="adm-button adm-danger" onClick={()=>void remove()} disabled={disabled||uploading}><Trash2 aria-hidden="true"/>Remove</button>}
     </div>
     <small>JPEG, PNG or WebP. Maximum 8 MiB. Uploading does not save the catalog record.</small>
-    <label className="adm-field" htmlFor={`catalog-${kind}-image-url`}><span>Image URL or asset path</span><input id={`catalog-${kind}-image-url`} value={value} maxLength={2000} onChange={event=>urlChanged(event.target.value)} placeholder="https://… or /images/…"/></label>
     {message&&<p className="adm-image-success" role="status">{message}</p>}
     {validationError&&<p className="adm-error" role="alert">{validationError}</p>}
     {error&&<p className="adm-error" role="alert">{error}</p>}

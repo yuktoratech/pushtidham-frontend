@@ -1,7 +1,8 @@
 import {CatalogImage} from './catalog-image';
 import { PageLink } from './page-link';
 import type { LucideIcon } from 'lucide-react';
-import { ChevronRight, Flower2, HandHeart, HeartHandshake, UsersRound } from 'lucide-react';
+import { ChevronRight, Flower2, HandHeart, HeartHandshake, MapPin, UsersRound } from 'lucide-react';
+import { templeContact } from '../lib/contact';
 
 export function AboutHero() {
   return (
@@ -42,6 +43,7 @@ export function AboutContent() {
         <InformationCard icon={HeartHandshake} title="Learning and Culture">Education in Pushtimarg, Hindu traditions, Indian culture and the arts helps families share enduring values with future generations.</InformationCard>
         <InformationCard icon={UsersRound} title="Community and Service">The Samaj encourages belonging, volunteerism, interfaith harmony and responsible support for people and humanitarian causes.</InformationCard>
       </div>
+      <div className="about-directions"><MapPin aria-hidden="true"/><div><h2>Visit Pushtidham Haveli</h2><p>{templeContact.address}</p></div><a className="button" href={templeContact.mapsUrl} target="_blank" rel="noopener noreferrer">Get Directions</a></div>
       <div className="about-closing-message"><span className="about-ornament" aria-hidden="true">❧</span><blockquote>“Seva, Bhakti and Sanskar for a Brighter Tomorrow”</blockquote><span className="about-ornament" aria-hidden="true">❧</span></div>
     </section>
   );

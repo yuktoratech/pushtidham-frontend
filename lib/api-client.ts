@@ -2,6 +2,7 @@ export type AuthUser = {
   id: string;
   name: string;
   email: string;
+  phone: string;
   role: "donor" | "admin";
   status: "active" | "disabled";
 };
@@ -177,16 +178,61 @@ export const authApi = {
       { method: "POST", body: JSON.stringify({ email, password }) },
       null,
     ),
-  register: (name: string, email: string, password: string) =>
+  register: (name: string, email: string, password: string, phone = "") =>
     send<AuthResult>(
       "/auth/register",
-      { method: "POST", body: JSON.stringify({ name, email, password }) },
+      { method: "POST", body: JSON.stringify({ name, email, password, phone }) },
       null,
     ),
   logout: () =>
     send<null>("/auth/logout", { method: "POST", body: "{}" }, null),
   me: () => apiRequest<AuthUser>("/auth/me"),
+  profile: (body: {name: string; email: string; phone: string}) =>
+    apiRequest<AuthUser>("/auth/profile", {method: "PATCH", body: JSON.stringify(body)}),
+  changePassword: (body: {currentPassword: string; newPassword: string; confirmPassword: string}) =>
+    apiRequest<null>("/auth/change-password", {method: "POST", body: JSON.stringify(body)}),
+  forgotPassword: (email: string) =>
+    send<null>("/auth/forgot-password", {method: "POST", body: JSON.stringify({email})}, null),
+  resetPassword: (body: {token: string; newPassword: string; confirmPassword: string}) =>
+    send<null>("/auth/reset-password", {method: "POST", body: JSON.stringify(body)}, null),
 };
+export const contactApi = {
+  send: (body: {name: string; email: string; phone: string; subject: string; message: string}) =>
+    send<null>("/contact", {method: "POST", body: JSON.stringify(body)}, null),
+};
+export async function downloadAuthorized(path: string, fallbackName: string): Promise<void> {
+  if (!baseUrl) throw new ApiError(0, "API_CONFIGURATION", "Account services are not configured.");
+  const request = (token: string | null) => fetch(`${baseUrl}${path}`, {
+    headers: token ? {Authorization: `Bearer ${token}`} : {},
+    credentials: "include",
+    cache: "no-store",
+    signal: AbortSignal.timeout(30000),
+  });
+  let response: Response;
+  try {
+    response = await request(accessToken);
+    if (response.status === 401) {
+      await refreshSession();
+      response = await request(accessToken);
+    }
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    throw new ApiError(0, "NETWORK_ERROR", "Download is unavailable. Please try again.");
+  }
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null) as {error?: {code?: string; message?: string}} | null;
+    throw new ApiError(response.status, payload?.error?.code ?? "DOWNLOAD_ERROR", payload?.error?.message ?? "Download could not be completed.");
+  }
+  const blob = await response.blob();
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.href = url;
+  link.download = fallbackName;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
 export type PaymentMethodFamily = "card" | "ach";
 export type PaymentAttemptStatus = "created" | "requires_action" | "verification_pending" | "processing" | "succeeded" | "failed" | "canceled";
 export type PaymentStart = { attemptId:string; status:PaymentAttemptStatus; baseDonationCents:number; feeContributionCents:number; totalChargeCents:number; currency:"USD"; statusToken?:string; checkoutUrl?:string; orderId?:string; approvalUrl?:string };
@@ -209,6 +255,9 @@ export const donationApi={
  createOffline:(body:object)=>apiRequest<DonationRecord>("/admin/donations/offline",{method:"POST",body:JSON.stringify(body)}),
  setOfflineStatus:(id:string,status:"completed"|"rejected",adminNote?:string)=>apiRequest<DonationRecord>(`/admin/donations/${encodeURIComponent(id)}/status`,{method:"PATCH",body:JSON.stringify({status,...(adminNote?{adminNote}:{})})}),
  report:(query="")=>apiRequest<FinancialReport>(`/admin/reports/financial${query?`?${query}`:""}`),
+ donorReceipt:(id:string,reference:string)=>downloadAuthorized(`/donations/${encodeURIComponent(id)}/receipt`,`${reference}.pdf`),
+ adminReceipt:(id:string,reference:string)=>downloadAuthorized(`/admin/donations/${encodeURIComponent(id)}/receipt`,`${reference}.pdf`),
+ exportCsv:(query="")=>downloadAuthorized(`/admin/donations/export.csv${query?`?${query}`:""}`,"pushtidham-donations.csv"),
 };
 export function authErrorMessage(error: unknown) {
   if (error instanceof ApiError) {

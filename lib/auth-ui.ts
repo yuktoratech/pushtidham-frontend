@@ -5,11 +5,11 @@ export const emptyAuthValues: AuthValues = {firstName:'',lastName:'',email:'',ph
 export const authCopy = {
   login: {title:'Welcome Back',subtitle:'Connect with your donor account.',button:'Login'},
   register: {title:'Create Account',subtitle:'Join our community of devotion and seva.',button:'Create Account'},
-  'forgot-password': {title:'Forgot Password?',subtitle:'We’ll help you find your way back to your account.',button:'Preview Reset Request'},
-  'reset-password': {title:'Reset Password',subtitle:'Choose a new password for your donor account.',button:'Check Password Preview'},
+  'forgot-password': {title:'Forgot Password?',subtitle:'Request a secure link to reset your password.',button:'Request Reset Link'},
+  'reset-password': {title:'Reset Password',subtitle:'Choose a new password for your donor account.',button:'Reset Password'},
 };
 export const passwordRequirements = 'Use at least 8 characters, including a letter and a number.';
-export const registrationPasswordRequirements = 'Use 12–72 characters, with no more than 72 UTF-8 bytes.';
+export const registrationPasswordRequirements = 'Use 8–72 characters, with no more than 72 UTF-8 bytes.';
 export function validateAuth(mode:AuthMode, values:AuthValues) {
   const errors:Partial<Record<AuthField,string>>={};
   if(mode==='register'){
@@ -22,9 +22,9 @@ export function validateAuth(mode:AuthMode, values:AuthValues) {
   }
   if(mode!=='forgot-password'){
     if(!values.password)errors.password='Please enter your password.';
-    else if(mode==='register'&&(values.password.length<12||values.password.length>72||new TextEncoder().encode(values.password).length>72))errors.password=registrationPasswordRequirements;
+    else if(mode==='register'&&(values.password.length<8||values.password.length>72||new TextEncoder().encode(values.password).length>72))errors.password=registrationPasswordRequirements;
     else if(mode==='login'&&(values.password.length>72||new TextEncoder().encode(values.password).length>72))errors.password='Password must not exceed 72 UTF-8 bytes.';
-    else if(mode==='reset-password'&&(values.password.length<8||!/[a-zA-Z]/.test(values.password)||!/[0-9]/.test(values.password)))errors.password='Use at least 8 characters, including a letter and a number.';
+    else if(mode==='reset-password'&&(values.password.length<8||values.password.length>72||new TextEncoder().encode(values.password).length>72))errors.password=registrationPasswordRequirements;
   }
   if(mode==='register'&&`${values.firstName.trim()} ${values.lastName.trim()}`.length>120)errors.firstName='Your full name must not exceed 120 characters.';
   if(mode==='register'||mode==='reset-password'){

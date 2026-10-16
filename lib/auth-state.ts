@@ -108,8 +108,8 @@ async function authenticate(
 }
 export const login = (email: string, password: string) =>
   authenticate(() => authApi.login(email, password));
-export const register = (name: string, email: string, password: string) =>
-  authenticate(() => authApi.register(name, email, password));
+export const register = (name: string, email: string, password: string, phone = "") =>
+  authenticate(() => authApi.register(name, email, password, phone));
 export async function logout() {
   if (restoration) await restoration;
   await authApi.logout(); // A failed revocation keeps the session visible and allows retry.
@@ -142,6 +142,6 @@ export function userContact(user: AuthUser | null) {
     firstName,
     lastName: last.join(" "),
     email: user?.email ?? "",
-    phone: "",
+    phone: user?.phone ?? "",
   };
 }

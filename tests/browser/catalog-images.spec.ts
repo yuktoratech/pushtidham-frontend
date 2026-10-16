@@ -47,14 +47,14 @@ test('Giving and Event image controls are usable at desktop and mobile widths',a
     await page.goto('/admin/giving');
     await page.getByRole('button',{name:'Edit Mangla Seva'}).click();
     await expect(page.getByRole('group',{name:'Catalog image'})).toBeVisible();
-    await expect(page.getByLabel('Image URL or asset path')).toHaveValue(image);
+    await expect(page.getByLabel('Image URL or asset path')).toHaveCount(0);
     await noOverflow(page);
     await page.getByRole('button',{name:'Cancel'}).click();
 
     await page.goto('/admin/events');
     await page.getByRole('button',{name:'Edit Temple Gathering'}).click();
     await expect(page.getByRole('group',{name:'Catalog image'})).toBeVisible();
-    await expect(page.getByLabel('Image URL or asset path')).toHaveValue(image);
+    await expect(page.getByLabel('Image URL or asset path')).toHaveCount(0);
     await noOverflow(page);
     await page.getByRole('button',{name:'Cancel'}).click();
   }

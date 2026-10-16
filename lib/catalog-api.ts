@@ -31,8 +31,8 @@ export type EventRecord = RecordBase & {
   status: EventStatus;
 };
 
-export type GivingInput = Omit<GivingRecord, '_id' | 'createdAt' | 'updatedAt'>;
-export type EventInput = Omit<EventRecord, '_id' | 'createdAt' | 'updatedAt'>;
+export type GivingInput = Omit<GivingRecord, '_id' | 'createdAt' | 'updatedAt' | 'slug'> & {slug?: string};
+export type EventInput = Omit<EventRecord, '_id' | 'createdAt' | 'updatedAt' | 'slug'> & {slug?: string};
 export type CatalogImageKind = 'giving' | 'events';
 export type UploadedImage = {
   url: string;

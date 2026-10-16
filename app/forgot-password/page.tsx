@@ -1,4 +1,4 @@
 import type { Metadata } from 'next';
 import { AuthLayout } from '../../components/auth-layout';
-export const metadata: Metadata = {title:'Forgot Password | Pushtidham Haveli',description:'Password form preview only; no email is sent or password changed.'};
+export const metadata: Metadata = {title:'Forgot Password | Pushtidham Haveli',description:'Request a secure donor account password reset link.'};
 export default function Page(){return <AuthLayout mode="forgot-password"/>;}
