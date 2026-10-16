@@ -14,6 +14,7 @@ type RecordBase = {
 
 export type GivingRecord = RecordBase & {
   description: string;
+  image: string;
   amountType: GivingAmountType;
   fixedAmountsCents: number[];
   status: GivingStatus;
@@ -32,6 +33,13 @@ export type EventRecord = RecordBase & {
 
 export type GivingInput = Omit<GivingRecord, '_id' | 'createdAt' | 'updatedAt'>;
 export type EventInput = Omit<EventRecord, '_id' | 'createdAt' | 'updatedAt'>;
+export type CatalogImageKind = 'giving' | 'events';
+export type UploadedImage = {
+  url: string;
+  key: string;
+  contentType: 'image/jpeg' | 'image/png' | 'image/webp';
+  size: number;
+};
 
 const query = (values: Record<string, string | number | undefined>) => {
   const params = new URLSearchParams();
@@ -55,5 +63,11 @@ export const catalogApi = {
   replaceEvent: (id: string, body: EventInput) => apiRequest<EventRecord>(`/admin/events/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
   setEventStatus: (id: string, status: EventStatus) => apiRequest<EventRecord>(`/admin/events/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
   deleteEvent: (id: string) => apiRequest<void>(`/admin/events/${id}`, { method: 'DELETE' }),
+  uploadImage: (kind: CatalogImageKind, file: File) => {
+    const body = new FormData();
+    body.append('image', file);
+    return apiRequest<UploadedImage>(`/admin/uploads/${kind}`, { method: 'POST', body });
+  },
+  deleteUploadedImage: (url: string) => apiRequest<void>('/admin/uploads', { method: 'DELETE', body: JSON.stringify({ url }) }),
 };
 

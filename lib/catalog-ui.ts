@@ -38,7 +38,7 @@ export function givingView(record: GivingRecord): GivingOpportunity {
     ...record,
     shortDescription: record.description || 'Choose an amount to support this offering.',
     fullDescription: record.description || 'Please contact the Haveli for details about this offering.',
-    image: '/images/diya.webp',
+    image: record.image || '/images/diya.webp',
     imageAlt: '',
     suggestedAmounts: record.fixedAmountsCents.map(centsToUsd),
     amountTypeUi: toUiAmountType(record.amountType),
