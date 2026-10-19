@@ -7,8 +7,9 @@ export const metadata: Metadata = {
   title: "Pushtidham Haveli",
   description: "A place of devotion, seva and community in Ocala, Florida. Discover Pushtidham Haveli.",
   icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
+    icon: { url: "/favicon.ico", sizes: "16x16 32x32 48x48 64x64", type: "image/x-icon" },
+    shortcut: "/favicon.ico",
+    apple: { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
   },
 };
 
