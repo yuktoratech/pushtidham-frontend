@@ -16,7 +16,7 @@ export function DonationPanel({opportunity,event}:PanelProps){
   const ready=!loading;
   const initial=ready?readDonationSelection(new URLSearchParams(window.location.search),data):null;
   const key=`${ready}:${event?'event':'general'}:${event?.slug||opportunity?.slug}:${opportunity?.amountTypeUi}:${opportunity?.suggestedAmounts.join(',')}`;
-  const matches=event?initial?.categorySlug==='event'&&initial.eventSlug===event.slug:initial?.categorySlug==='general'&&initial.givingSlug===opportunity?.slug;
+  const matches=event?initial?.categorySlug==='event'&&initial.eventSlug===event.slug:initial?.categorySlug===(opportunity?.category==='utsav'?'event':'general')&&initial.givingSlug===opportunity?.slug;
   return <DonationAmountForm key={key} opportunity={opportunity} event={event} initial={matches?initial:null}/>;
 }
 
@@ -35,7 +35,7 @@ function DonationAmountForm({opportunity,event,initial}:PanelProps & {initial:Do
   function continueDonation(e:FormEvent<HTMLFormElement>){
     e.preventDefault();setTouched(true);if(!valid||parsed.cents===null)return;
     if(!opportunity&&!event)return;
-    const selection:DonationSelection={amountCents:parsed.cents,currency:'USD',donationType:'one-time',amountChoice:choice,...(event?{categorySlug:'event' as const,eventSlug:event.slug,eventId:event.id}:{categorySlug:'general' as const,givingSlug:opportunity!.slug})};
+    const selection:DonationSelection={amountCents:parsed.cents,currency:'USD',donationType:'one-time',amountChoice:choice,...(event?{categorySlug:'event' as const,eventSlug:event.slug,eventId:event.id}:{categorySlug:opportunity!.category==='utsav'?'event' as const:'general' as const,givingSlug:opportunity!.slug})};
     try{sessionStorage.setItem(donationSelectionKey,JSON.stringify(selection));}catch{}
     // Match PageLink's document navigation so checkout reads the destination
     // URL after it is committed, rather than the previous selection-page URL.
@@ -55,6 +55,6 @@ function DonationAmountForm({opportunity,event,initial}:PanelProps & {initial:Do
       <div className="donation-total"><span>Your contribution</span><strong>{valid?donationCurrency(parsed.cents!):'Choose an amount'}<small>USD</small></strong></div>
       <button type="submit" className="button donation-continue" disabled={!valid}>Continue to Checkout</button><p className="donation-payment-note">No payment is taken when choosing an amount.</p>
     </form>
-    <div className="donation-trust"><div><Landmark aria-hidden="true"/><p>Your contribution supports Pushthidham Haveli.</p></div><div><FileText aria-hidden="true"/><p>No receipt is issued for a donation preview.</p></div></div>
+    <div className="donation-trust"><div><Landmark aria-hidden="true"/><p>Your contribution supports Pushtidham Haveli.</p></div><div><FileText aria-hidden="true"/><p>No receipt is issued for a donation preview.</p></div></div>
   </aside>;
 }

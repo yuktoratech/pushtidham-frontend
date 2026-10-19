@@ -87,6 +87,8 @@ async function authenticate(
 ) {
   // Wait for startup's cookie rotation before changing the signed-in identity.
   if (restoration) await restoration;
+  // A new sign-in attempt must not retain an earlier refresh/rate-limit error.
+  publish({ ...state, error: null });
   const version = beginAuthChange();
   const result = await action();
   if (!acceptAccessToken(result.accessToken, version))

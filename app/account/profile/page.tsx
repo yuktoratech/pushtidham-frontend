@@ -47,7 +47,7 @@ export default function ProfilePage() {
   function props(field: ProfileField, label: string, autoComplete: string, type = 'text') {
     return {id: `profile-${field}`, label, value: values[field], onChange: (value: string) => update(field, value), onBlur: () => {
       if (values[field] || attempted) setErrors(prev => ({...prev, [field]: validate(values)[field]}));
-    }, error: errors[field], autoComplete, type, optional: field === 'phone'};
+    }, error: errors[field], autoComplete, type, optional: field === 'phone', disabled: field === 'email', help: field === 'email' ? 'Your account email address cannot be changed.' : undefined};
   }
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

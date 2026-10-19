@@ -7,7 +7,7 @@ export type DonationSelection = {
   currency: 'USD';
   donationType: 'one-time';
   amountChoice: number | 'custom';
-} & ({categorySlug:'general';givingSlug:string;eventSlug?:never;eventId?:never} | {categorySlug:'event';eventSlug:string;eventId:string;givingSlug?:never});
+} & ({categorySlug:'general';givingSlug:string;eventSlug?:never;eventId?:never} | {categorySlug:'event';eventSlug:string;eventId:string;givingSlug?:never} | {categorySlug:'event';givingSlug:string;eventSlug?:never;eventId?:never});
 export const donationSelectionKey = 'pushthidham-donation-selection';
 export function parseCustomAmount(value:string):{cents:number|null;error:string|null}{
   return parseUsdToCents(value);
@@ -26,6 +26,7 @@ export function donatePath(givingSlug='general-donation'){
   return `/donate?${query}`;
 }
 export function eventDonationPath(eventSlug:string){return `/donate?${new URLSearchParams({category:'event',event:eventSlug})}`;}
+export function utsavDonationPath(givingSlug:string){return `/donate?${new URLSearchParams({category:'event',giving:givingSlug})}`;}
 export function allowsFixed(type:DonationAmountType){return type!=='custom';}
 export function allowsCustom(type:DonationAmountType){return type!=='fixed';}
 export function parseFixedAmounts(value:string,type:DonationAmountType){

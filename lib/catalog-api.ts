@@ -13,6 +13,8 @@ type RecordBase = {
 };
 
 export type GivingRecord = RecordBase & {
+  category?: 'general' | 'daily_seva' | 'utsav';
+  festivalGroup?: string;
   description: string;
   image: string;
   amountType: GivingAmountType;

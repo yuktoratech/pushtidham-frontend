@@ -1,6 +1,7 @@
 import type { GivingOpportunity, TempleEvent } from './catalog-ui';
 import { donationQuery, amountMatchesOpportunity, type DonationSelection } from './donation-selection';
 import type { DemoDonor } from './account-demo';
+import {festivalName} from './seva';
 
 export type PaymentMethod = 'card' | 'ach' | 'paypal' | 'venmo' | 'bank-transfer';
 export type CheckoutDraft = {donor:DemoDonor;method:PaymentMethod;transactionReference:string;donorMode:'guest'|'demo'};
@@ -20,22 +21,28 @@ export function readDonationSelection(query:URLSearchParams,catalog:DonationCata
   const amountChoice=rawChoice==='custom'?'custom':Number(rawChoice);
   const eventCategory=query.get('category')==='event'||(query.get('category')!=='general'&&query.has('event'));
   if(eventCategory){
+    if (query.has('giving')) {
+      if (query.has('event')) return null;
+      const giving = catalog.giving.find(g => g.slug === query.get('giving') && g.status === 'active' && g.category === 'utsav');
+      if (!giving || !amountMatchesOpportunity(giving, amountChoice, amount)) return null;
+      return {categorySlug:'event', givingSlug:giving.slug, amountCents:amount, currency:'USD', donationType:'one-time', amountChoice};
+    }
     const event=catalog.events.find(e=>e.slug===query.get('event'));
     if(!event||amountChoice!=='custom')return null;
     return {categorySlug:'event',eventSlug:event.slug,eventId:event.id,amountCents:amount,currency:'USD',donationType:'one-time',amountChoice};
   }
   if(query.has('event'))return null;
   const opportunity=catalog.giving.find(item=>item.slug===query.get('giving')&&item.status==='active');
-  if(!opportunity||!amountMatchesOpportunity(opportunity,amountChoice,amount))return null;
+  if(!opportunity||opportunity.category==='utsav'||!amountMatchesOpportunity(opportunity,amountChoice,amount))return null;
   return {categorySlug:'general',givingSlug:opportunity.slug,amountCents:amount,currency:'USD',donationType:'one-time',amountChoice};
 }
 export function donationContext(selection:DonationSelection,catalog:DonationCatalog){
-  if(selection.categorySlug==='event'){
+  if(selection.categorySlug==='event' && selection.eventSlug){
     const event=catalog.events.find(e=>e.slug===selection.eventSlug)!;
     return {...event,category:'Event' as const,event};
   }
   const giving=catalog.giving.find(g=>g.slug===selection.givingSlug)!;
-  return {...giving,id:giving._id,category:'General' as const,event:undefined};
+  return {...giving,id:giving._id,title:giving.category==='utsav'?`${festivalName(giving.festivalGroup)} — ${giving.title}`:giving.title,category:selection.categorySlug==='event'?'Event' as const:'General' as const,event:undefined};
 }
 
 export function editDonationPath(selection:DonationSelection){return `/donate?${donationQuery(selection)}`;}
