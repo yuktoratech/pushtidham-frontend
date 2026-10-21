@@ -6,13 +6,13 @@ import {ApiError} from '../lib/api-client';
 import {catalogApi,type CatalogImageKind} from '../lib/catalog-api';
 import {CatalogImage} from './catalog-image';
 
-const maxBytes=15*1024*1024;
+const maxBytes=8*1024*1024;
 const allowedTypes=new Set(['image/jpeg','image/png','image/webp']);
 
 function uploadError(error:unknown){
   if(error instanceof ApiError){
     if(error.code==='IMAGE_PROCESSING_LIMIT')return 'This image exceeds safe pixel or processing limits. Please resize it and try again.';
-    if(error.status===413)return 'The image is too large. Choose a file no larger than 15 MiB.';
+    if(error.status===413)return 'The image is too large. Choose a file no larger than 8 MiB.';
     if(error.code==='INVALID_IMAGE')return 'This file could not be read as a valid JPG, JPEG, PNG, or WebP image. Please export it again and retry.';
     if(error.code==='IMAGE_DECODE_FAILED')return 'This image could not be decoded. It may be damaged or use an unsupported encoding. Please export it again as JPG, PNG, or WebP.';
     if(error.code==='IMAGE_UPLOAD_FAILED'||error.code==='NETWORK_ERROR')return 'The image could not be uploaded. Please check your connection and try again. Your form values are unchanged.';
@@ -22,7 +22,7 @@ function uploadError(error:unknown){
   return 'The image could not be uploaded. Your other form values are unchanged.';
 }
 
-export function AdminImageField({kind,value,onChange,temporaryUrl,onTemporaryChange,onBusyChange,disabled=false,validationError}:{kind:CatalogImageKind;value:string;onChange:(value:string)=>void;temporaryUrl?:string;onTemporaryChange:(value?:string)=>void;onBusyChange:(busy:boolean)=>void;disabled?:boolean;validationError?:string}){
+export function AdminImageField({kind,value,onChange,temporaryUrl,onTemporaryChange,onBusyChange,disabled=false,validationError,slug,placement}:{kind:CatalogImageKind;value:string;onChange:(value:string)=>void;temporaryUrl?:string;onTemporaryChange:(value?:string)=>void;onBusyChange:(busy:boolean)=>void;disabled?:boolean;validationError?:string;slug?:string;placement?:'cover'|'gallery'}){
   const [preview,setPreview]=useState('');
   const [uploading,setUploading]=useState(false);
   const [error,setError]=useState('');
@@ -44,19 +44,15 @@ export function AdminImageField({kind,value,onChange,temporaryUrl,onTemporaryCha
     if(!file)return;
     setError('');setMessage('');
     if(!allowedTypes.has(file.type)){setError('Choose a JPG, JPEG, PNG, or WebP image.');return;}
-    if(file.size>maxBytes){setError('The image is too large. Choose a file no larger than 15 MiB.');return;}
+    if(file.size>maxBytes){setError('The image is too large. Choose a file no larger than 8 MiB.');return;}
     if(value&&!window.confirm('Replace the current image? The change is finalized when you save this record.'))return;
     localPreview(file);
     setBusy(true);
     try{
-      const uploaded=await catalogApi.uploadImage(kind,file);
-      const previous=temporaryUrl;
+      const uploaded=await catalogApi.uploadImage(kind,file,{slug,placement});
       onChange(uploaded.url);
       onTemporaryChange(uploaded.url);
       setMessage('Image uploaded. Save the record to apply it.');
-      if(previous&&previous!==uploaded.url){
-        try{await catalogApi.deleteUploadedImage(previous);}catch{/* Best-effort cleanup; record save is still safe. */}
-      }
     }catch(reason){setPreview('');if(objectUrl.current){URL.revokeObjectURL(objectUrl.current);objectUrl.current='';}setError(uploadError(reason));}
     finally{setBusy(false);}
   }
@@ -64,11 +60,9 @@ export function AdminImageField({kind,value,onChange,temporaryUrl,onTemporaryCha
     if(!value||!window.confirm('Remove this image when the record is saved?'))return;
     setError('');setMessage('Image removed. Save the record to apply it.');setPreview('');
     if(objectUrl.current){URL.revokeObjectURL(objectUrl.current);objectUrl.current='';}
-    if(temporaryUrl===value){
-      try{await catalogApi.deleteUploadedImage(value);}catch(reason){setError(uploadError(reason));return;}
-      onTemporaryChange(undefined);
-    }
+    if(temporaryUrl===value)onTemporaryChange(undefined);
     onChange('');
+    setMessage('Image removed from this form. The uploaded file is retained for recovery.');
   }
   const shown=preview||value;
   return <fieldset className="adm-image-field adm-field-wide" disabled={disabled||uploading}>
@@ -78,7 +72,7 @@ export function AdminImageField({kind,value,onChange,temporaryUrl,onTemporaryCha
       <label className="adm-button adm-secondary adm-upload-button"><ImagePlus aria-hidden="true"/>{uploading?'Uploading…':value?'Replace upload':'Upload image'}<input type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" onChange={event=>void select(event)} disabled={disabled||uploading}/></label>
       {value&&<button type="button" className="adm-button adm-danger" onClick={()=>void remove()} disabled={disabled||uploading}><Trash2 aria-hidden="true"/>Remove</button>}
     </div>
-    <small>JPG, JPEG, PNG or WebP. Maximum 15 MiB. Uploading does not save the catalog record.</small>
+    <small>JPG, JPEG, PNG or WebP. Maximum 8 MiB. Uploading does not save the catalog record.</small>
     {message&&<p className="adm-image-success" role="status">{message}</p>}
     {validationError&&<p className="adm-error" role="alert">{validationError}</p>}
     {error&&<p className="adm-error" role="alert">{error}</p>}

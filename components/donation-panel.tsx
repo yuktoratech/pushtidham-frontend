@@ -9,18 +9,19 @@ import { usePublicCatalog } from './catalog-provider';
 import { eventView, givingView } from '../lib/catalog-ui';
 import { centsToUsdInput } from '../lib/money';
 
-type PanelProps={opportunity?:GivingOpportunity;event?:TempleEvent};
-export function DonationPanel({opportunity,event}:PanelProps){
+import type {GivingCategoryRecord} from '../lib/catalog-api';
+type PanelProps={opportunity?:GivingOpportunity;event?:TempleEvent;givingCategory?:GivingCategoryRecord};
+export function DonationPanel({opportunity,event,givingCategory}:PanelProps){
   const {giving,events,loading}=usePublicCatalog();
   const data={giving:giving.map(givingView),events:events.map(eventView)};
   const ready=!loading;
   const initial=ready?readDonationSelection(new URLSearchParams(window.location.search),data):null;
   const key=`${ready}:${event?'event':'general'}:${event?.slug||opportunity?.slug}:${opportunity?.amountTypeUi}:${opportunity?.suggestedAmounts.join(',')}`;
   const matches=event?initial?.categorySlug==='event'&&initial.eventSlug===event.slug:initial?.categorySlug===(opportunity?.category==='utsav'?'event':'general')&&initial.givingSlug===opportunity?.slug;
-  return <DonationAmountForm key={key} opportunity={opportunity} event={event} initial={matches?initial:null}/>;
+  return <DonationAmountForm key={key} opportunity={opportunity} event={event} givingCategory={givingCategory} initial={matches?initial:null}/>;
 }
 
-function DonationAmountForm({opportunity,event,initial}:PanelProps & {initial:DonationSelection|null}){
+function DonationAmountForm({opportunity,event,givingCategory,initial}:PanelProps & {initial:DonationSelection|null}){
   const config=opportunity||{amountTypeUi:'custom' as const,suggestedAmounts:[]};
   const fixed=allowsFixed(config.amountTypeUi);
   const customAllowed=allowsCustom(config.amountTypeUi);
@@ -35,7 +36,7 @@ function DonationAmountForm({opportunity,event,initial}:PanelProps & {initial:Do
   function continueDonation(e:FormEvent<HTMLFormElement>){
     e.preventDefault();setTouched(true);if(!valid||parsed.cents===null)return;
     if(!opportunity&&!event)return;
-    const selection:DonationSelection={amountCents:parsed.cents,currency:'USD',donationType:'one-time',amountChoice:choice,...(event?{categorySlug:'event' as const,eventSlug:event.slug,eventId:event.id}:{categorySlug:opportunity!.category==='utsav'?'event' as const:'general' as const,givingSlug:opportunity!.slug})};
+    const selection:DonationSelection={amountCents:parsed.cents,currency:'USD',donationType:'one-time',amountChoice:choice,...(givingCategory?{givingCategoryId:givingCategory._id,givingCategorySlug:givingCategory.slug,givingId:opportunity?._id,givingTitle:opportunity?.title}:{}),...(event?{categorySlug:'event' as const,eventSlug:event.slug,eventId:event.id}:{categorySlug:opportunity!.category==='utsav'?'event' as const:'general' as const,givingSlug:opportunity!.slug})};
     try{sessionStorage.setItem(donationSelectionKey,JSON.stringify(selection));}catch{}
     // Match PageLink's document navigation so checkout reads the destination
     // URL after it is committed, rather than the previous selection-page URL.

@@ -3,6 +3,10 @@ import type { DonationAmountType, GivingOpportunity } from './catalog-ui';
 
 export type DonationCategory = 'General' | 'Event';
 export type DonationSelection = {
+  givingCategoryId?: string;
+  givingCategorySlug?: string;
+  givingTitle?: string;
+  givingId?: string;
   amountCents: number;
   currency: 'USD';
   donationType: 'one-time';
@@ -17,6 +21,9 @@ export function donationQuery(selection:DonationSelection){
   const query=new URLSearchParams({category:selection.categorySlug,amount:String(selection.amountCents),choice:String(selection.amountChoice),type:selection.donationType});
   if(selection.givingSlug&&!selection.eventSlug)query.set('giving',selection.givingSlug);
   if(selection.eventSlug)query.set('event',selection.eventSlug);
+  if(selection.givingCategoryId)query.set('categoryId',selection.givingCategoryId);
+  if(selection.givingCategorySlug)query.set('givingCategory',selection.givingCategorySlug);
+  if(selection.givingId)query.set('givingId',selection.givingId);
   return query.toString();
 }
 export function checkoutPath(selection:DonationSelection){return `/checkout?${donationQuery(selection)}`;}

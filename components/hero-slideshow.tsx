@@ -26,7 +26,7 @@ export function HeroSlideshow() {
     if (!playing || hovered) return;
     const timer = window.setInterval(() => {
       if (document.visibilityState === 'visible') setActive(index => (index + 1) % homeSlides.length);
-    }, 6000);
+    }, 5000);
     return () => window.clearInterval(timer);
   }, [playing, hovered]);
 

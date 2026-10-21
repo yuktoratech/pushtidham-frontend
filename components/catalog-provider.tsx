@@ -1,11 +1,12 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
-import { catalogApi, type EventRecord, type GivingRecord } from '../lib/catalog-api';
+import { catalogApi, type EventRecord, type GivingCategoryRecord, type GivingRecord } from '../lib/catalog-api';
 import { catalogErrorMessage } from '../lib/catalog-ui';
 
 type CatalogState = {
   giving: GivingRecord[];
+  categories: GivingCategoryRecord[];
   events: EventRecord[];
   loading: boolean;
   error: string | null;
@@ -14,23 +15,26 @@ type CatalogState = {
   reload: () => Promise<void>;
 };
 
-const fetchCatalog=()=>Promise.allSettled([catalogApi.publicGiving(),catalogApi.publicEvents()] as const);
+const fetchCatalog=()=>Promise.allSettled([catalogApi.publicGiving(),catalogApi.publicEvents(),catalogApi.publicGivingCategories()] as const);
 const CatalogContext = createContext<CatalogState | null>(null);
 
 export function CatalogProvider({ children }: { children: ReactNode }) {
   const [giving, setGiving] = useState<GivingRecord[]>([]);
   const [events, setEvents] = useState<EventRecord[]>([]);
+  const [categories, setCategories] = useState<GivingCategoryRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [givingError,setGivingError]=useState<string|null>(null);
   const [eventsError,setEventsError]=useState<string|null>(null);
   const apply=useCallback((results:Awaited<ReturnType<typeof fetchCatalog>>)=>{
-    const [g,e]=results;
+    const [g,e,c]=results;
     if(g.status==='fulfilled')setGiving(g.value);
     if(e.status==='fulfilled')setEvents(e.value);
+    if(c.status==='fulfilled')setCategories(c.value);
     const ge=g.status==='rejected'?catalogErrorMessage(g.reason):null;
     const ee=e.status==='rejected'?catalogErrorMessage(e.reason):null;
-    setGivingError(ge);setEventsError(ee);setError(ge||ee);
+    const ce=c.status==='rejected'?catalogErrorMessage(c.reason):null;
+    setGivingError(ge);setEventsError(ee);setError(ge||ee||ce);
   },[]);
   const reload = useCallback(async () => {
     setLoading(true);
@@ -51,7 +55,7 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
       .finally(() => { if (current) setLoading(false); });
     return () => { current = false; };
   }, [apply]);
-  return <CatalogContext.Provider value={{ giving, events, loading, error, givingError, eventsError, reload }}>{children}</CatalogContext.Provider>;
+  return <CatalogContext.Provider value={{ giving, events, categories, loading, error, givingError, eventsError, reload }}>{children}</CatalogContext.Provider>;
 }
 
 export function usePublicCatalog() {

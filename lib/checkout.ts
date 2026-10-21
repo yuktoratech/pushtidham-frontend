@@ -19,13 +19,17 @@ export function readDonationSelection(query:URLSearchParams,catalog:DonationCata
   if(!Number.isSafeInteger(amount)||amount<=0||query.get('type')!=='one-time')return null;
   const rawChoice=query.get('choice');
   const amountChoice=rawChoice==='custom'?'custom':Number(rawChoice);
+  if(query.has('event'))return null;
+  const contextGiving=catalog.giving.find(item=>item.slug===query.get('giving'));
+  if(query.has('categoryId')&&contextGiving?.categoryId!==query.get('categoryId'))return null;
+  const categoryContext={givingCategoryId:contextGiving?.categoryId,givingCategorySlug:query.get('givingCategory')||undefined,givingId:contextGiving?._id,givingTitle:contextGiving?.title};
   const eventCategory=query.get('category')==='event'||(query.get('category')!=='general'&&query.has('event'));
   if(eventCategory){
     if (query.has('giving')) {
       if (query.has('event')) return null;
       const giving = catalog.giving.find(g => g.slug === query.get('giving') && g.status === 'active' && g.category === 'utsav');
       if (!giving || !amountMatchesOpportunity(giving, amountChoice, amount)) return null;
-      return {categorySlug:'event', givingSlug:giving.slug, amountCents:amount, currency:'USD', donationType:'one-time', amountChoice};
+      return {...categoryContext,categorySlug:'event', givingSlug:giving.slug, amountCents:amount, currency:'USD', donationType:'one-time', amountChoice};
     }
     const event=catalog.events.find(e=>e.slug===query.get('event'));
     if(!event||amountChoice!=='custom')return null;
@@ -34,7 +38,7 @@ export function readDonationSelection(query:URLSearchParams,catalog:DonationCata
   if(query.has('event'))return null;
   const opportunity=catalog.giving.find(item=>item.slug===query.get('giving')&&item.status==='active');
   if(!opportunity||opportunity.category==='utsav'||!amountMatchesOpportunity(opportunity,amountChoice,amount))return null;
-  return {categorySlug:'general',givingSlug:opportunity.slug,amountCents:amount,currency:'USD',donationType:'one-time',amountChoice};
+  return {...categoryContext,categorySlug:'general',givingSlug:opportunity.slug,amountCents:amount,currency:'USD',donationType:'one-time',amountChoice};
 }
 export function donationContext(selection:DonationSelection,catalog:DonationCatalog){
   if(selection.categorySlug==='event' && selection.eventSlug){

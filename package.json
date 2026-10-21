@@ -11,6 +11,8 @@
     "build": "next build --webpack",
     "start": "next start",
     "test:browser": "playwright test --config=playwright.config.ts",
+    "validate:r2-manifest": "node scripts/validate-r2-manifest.mjs",
+    "test:r2-manifest": "node --test tests/unit/r2-manifest.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate"
   },

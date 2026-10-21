@@ -18,7 +18,7 @@ import { CatalogManagement } from './admin-catalog';
 import {RealAdminDashboard,RealAdminDonations,RealFinancialReports} from './admin-donations-real';
 import { formatDonationAmount as money, formatDonationDate as date } from '../lib/account-demo';
 import { createAdminState, createOfflineDonation, validateOfflineDonation, localDonationDate, offlineMethods, type OfflineDonationValues, donationTotals, filterDonations, donationCsv, emptyDonationFilters, type AdminState, type AdminDonation, type DonationFilters } from '../lib/admin-demo';
-const navigation=[{href:'/admin',label:'Overview',icon:LayoutDashboard},{href:'/admin/giving',label:'Giving',icon:HandHeart},{href:'/admin/events',label:'Events',icon:CalendarDays},{href:'/admin/donations',label:'Donations',icon:ReceiptText},{href:'/admin/reports',label:'Reports',icon:BarChart3}];
+const navigation=[{href:'/admin/giving-categories',label:'Giving Categories',icon:HandHeart},{href:'/admin',label:'Overview',icon:LayoutDashboard},{href:'/admin/giving',label:'Giving',icon:HandHeart},{href:'/admin/events',label:'Events',icon:CalendarDays},{href:'/admin/donations',label:'Donations',icon:ReceiptText},{href:'/admin/reports',label:'Reports',icon:BarChart3}];
 type AdminContextValue={data:AdminState;setData:React.Dispatch<React.SetStateAction<AdminState>>;notify:(message:string)=>void};
 const AdminContext=createContext<AdminContextValue|null>(null);
 function useAdmin(){return useContext(AdminContext)!;}
