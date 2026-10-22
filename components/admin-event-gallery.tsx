@@ -4,6 +4,7 @@ import {catalogApi} from '../lib/catalog-api';
 import {catalogErrorMessage} from '../lib/catalog-ui';
 import {CatalogImage} from './catalog-image';
 import type {GalleryEntry} from './event-gallery';
+import {MAX_IMAGE_BYTES,MAX_IMAGE_MIB} from '../lib/image-upload-limit';
 type LocalImage={id:string;file:File;preview:string;state:'ready'|'uploading'|'uploaded'|'error';error?:string};
 export function AdminEventGallery({value,cover,onChange,onCover,onBusy,onPending,disabled,slug}:{value:GalleryEntry[];cover:string;onChange:(rows:GalleryEntry[])=>void;onCover:(url:string)=>void;onBusy:(busy:boolean)=>void;onPending:(pending:boolean)=>void;disabled:boolean;slug?:string}){
  const [local,setLocal]=useState<LocalImage[]>([]),[error,setError]=useState('');
@@ -14,7 +15,7 @@ export function AdminEventGallery({value,cover,onChange,onCover,onBusy,onPending
  function select(files:FileList|null){
    if(!files)return;const next:LocalImage[]=[];
    for(const file of Array.from(files)){
-     if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>8*1024*1024){setError('Choose JPG, PNG or WebP files up to 8 MiB each.');continue;}
+     if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>MAX_IMAGE_BYTES){setError(`Choose JPG, PNG or WebP files up to ${MAX_IMAGE_MIB} MiB each.`);continue;}
      if(value.length+local.filter(row=>row.state!=='uploaded').length+next.length>=30){setError('Maximum 30 gallery images.');break;}
      const preview=URL.createObjectURL(file);urls.current.push(preview);next.push({id:crypto.randomUUID(),file,preview,state:'ready'});
    }

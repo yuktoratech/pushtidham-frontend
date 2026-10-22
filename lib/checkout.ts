@@ -1,5 +1,5 @@
 import type { GivingOpportunity, TempleEvent } from './catalog-ui';
-import { donationQuery, amountMatchesOpportunity, type DonationSelection } from './donation-selection';
+import { donationQuery, amountMatchesOpportunity, donationSelectionKey, type DonationSelection } from './donation-selection';
 import type { DemoDonor } from './account-demo';
 import {festivalName} from './seva';
 
@@ -7,7 +7,7 @@ export type PaymentMethod = 'card' | 'ach' | 'paypal' | 'venmo' | 'bank-transfer
 export type CheckoutDraft = {donor:DemoDonor;method:PaymentMethod;transactionReference:string;donorMode:'guest'|'demo'};
 export const checkoutDraftKey='pushthidham-checkout-draft';
 export const pendingPaymentKey='pushthidham-pending-payment';
-export type PendingPayment={attemptId:string;statusToken?:string;provider:'stripe'|'paypal';orderId?:string;createdAt:number;captureState?:'not_requested'|'requested'|'resolved'|'uncertain'};
+export type PendingPayment={attemptId:string;statusToken?:string;provider:'stripe'|'paypal';orderId?:string;createdAt:number;donationPurpose?:string;captureState?:'not_requested'|'requested'|'resolved'|'uncertain'};
 export function savePendingPayment(value:PendingPayment){sessionStorage.setItem(pendingPaymentKey,JSON.stringify(value));}
 export function readPendingPayment(){try{return JSON.parse(sessionStorage.getItem(pendingPaymentKey)||'null') as PendingPayment|null}catch{return null}}
 export function newIdempotencyKey(){return `checkout-${crypto.randomUUID()}`;}
@@ -38,7 +38,15 @@ export function readDonationSelection(query:URLSearchParams,catalog:DonationCata
   if(query.has('event'))return null;
   const opportunity=catalog.giving.find(item=>item.slug===query.get('giving')&&item.status==='active');
   if(!opportunity||opportunity.category==='utsav'||!amountMatchesOpportunity(opportunity,amountChoice,amount))return null;
-  return {...categoryContext,categorySlug:'general',givingSlug:opportunity.slug,amountCents:amount,currency:'USD',donationType:'one-time',amountChoice};
+  let donationPurpose: string | undefined;
+  if(opportunity.slug==='other'&&typeof sessionStorage!=='undefined'){
+    try{
+      const saved=JSON.parse(sessionStorage.getItem(donationSelectionKey)||'null') as DonationSelection|null;
+      if(saved?.givingSlug==='other'&&saved.amountCents===amount&&saved.amountChoice===amountChoice&&saved.givingId===opportunity._id)
+        donationPurpose=saved.donationPurpose;
+    }catch{}
+  }
+  return {...categoryContext,categorySlug:'general',givingSlug:opportunity.slug,amountCents:amount,currency:'USD',donationType:'one-time',amountChoice,donationPurpose};
 }
 export function donationContext(selection:DonationSelection,catalog:DonationCatalog){
   if(selection.categorySlug==='event' && selection.eventSlug){

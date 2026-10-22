@@ -22,21 +22,23 @@ export function DonationPanel({opportunity,event,givingCategory}:PanelProps){
 }
 
 function DonationAmountForm({opportunity,event,givingCategory,initial}:PanelProps & {initial:DonationSelection|null}){
-  const config=opportunity||{amountTypeUi:'custom' as const,suggestedAmounts:[]};
+  const other=opportunity?.slug==='other';
+  const config=other?{amountTypeUi:'custom' as const,suggestedAmounts:[]}:opportunity||{amountTypeUi:'custom' as const,suggestedAmounts:[]};
   const fixed=allowsFixed(config.amountTypeUi);
   const customAllowed=allowsCustom(config.amountTypeUi);
   const [choice,setChoice]=useState<number|'custom'>(initial?.amountChoice??(fixed?config.suggestedAmounts[0]:'custom'));
   const [custom,setCustom]=useState(initial?.amountChoice==='custom'?centsToUsdInput(initial.amountCents):'');
+  const [purpose,setPurpose]=useState(initial?.donationPurpose??'');
   const [touched,setTouched]=useState(false);
   const customRef=useRef<HTMLInputElement>(null);
   const parsed=choice==='custom'?parseCustomAmount(custom):parseCustomAmount(String(choice));
-  const valid=parsed.cents!==null&&amountMatchesOpportunity(config,choice,parsed.cents);
+  const valid=parsed.cents!==null&&amountMatchesOpportunity(config,choice,parsed.cents)&&(!other||Boolean(purpose.trim()));
   const showError=choice==='custom'&&(touched||custom.length>0)&&parsed.error;
   useEffect(()=>{if(choice==='custom')customRef.current?.focus();},[choice]);
   function continueDonation(e:FormEvent<HTMLFormElement>){
     e.preventDefault();setTouched(true);if(!valid||parsed.cents===null)return;
     if(!opportunity&&!event)return;
-    const selection:DonationSelection={amountCents:parsed.cents,currency:'USD',donationType:'one-time',amountChoice:choice,...(givingCategory?{givingCategoryId:givingCategory._id,givingCategorySlug:givingCategory.slug,givingId:opportunity?._id,givingTitle:opportunity?.title}:{}),...(event?{categorySlug:'event' as const,eventSlug:event.slug,eventId:event.id}:{categorySlug:opportunity!.category==='utsav'?'event' as const:'general' as const,givingSlug:opportunity!.slug})};
+    const selection:DonationSelection={amountCents:parsed.cents,currency:'USD',donationType:'one-time',amountChoice:choice,...(other?{donationPurpose:purpose.trim()}:{}),...(givingCategory?{givingCategoryId:givingCategory._id,givingCategorySlug:givingCategory.slug,givingId:opportunity?._id,givingTitle:opportunity?.title}:{}),...(event?{categorySlug:'event' as const,eventSlug:event.slug,eventId:event.id}:{categorySlug:opportunity!.category==='utsav'?'event' as const:'general' as const,givingSlug:opportunity!.slug})};
     try{sessionStorage.setItem(donationSelectionKey,JSON.stringify(selection));}catch{}
     // Match PageLink's document navigation so checkout reads the destination
     // URL after it is committed, rather than the previous selection-page URL.
@@ -52,6 +54,7 @@ function DonationAmountForm({opportunity,event,givingCategory,initial}:PanelProp
         {customAllowed&&<label className={`donation-amount-option donation-custom-option ${choice==='custom'?'is-selected':''}`}><input type="radio" name="donation-amount" value="custom" checked={choice==='custom'} onChange={()=>{setChoice('custom');setTouched(false);}}/><span>Custom Amount</span></label>}
       </fieldset>}
       {customAllowed&&choice==='custom'&&<div className="donation-custom-field"><label htmlFor="custom-donation">Custom amount (USD)</label><div className={`donation-currency-input ${showError?'has-error':''}`}><span aria-hidden="true">$</span><input ref={customRef} id="custom-donation" type="text" inputMode="decimal" autoComplete="off" placeholder="Enter amount" value={custom} onChange={e=>setCustom(e.target.value)} onBlur={()=>setTouched(true)} aria-invalid={!!showError} aria-describedby={showError?'donation-amount-error':'donation-amount-help'}/></div>{showError?<p id="donation-amount-error" className="donation-input-error" role="alert">{parsed.error}</p>:<p id="donation-amount-help" className="donation-input-help">Enter a positive amount in USD, with up to two decimal places.</p>}</div>}
+      {other&&<div className="donation-custom-field"><label htmlFor="donation-purpose">Donation Purpose <span aria-hidden="true">*</span></label><textarea id="donation-purpose" required rows={4} maxLength={500} value={purpose} onChange={e=>setPurpose(e.target.value)} onBlur={()=>setTouched(true)} aria-invalid={touched&&!purpose.trim()} aria-describedby={touched&&!purpose.trim()?'donation-purpose-error':'donation-purpose-help'}/>{touched&&!purpose.trim()?<p id="donation-purpose-error" className="donation-input-error" role="alert">Enter the purpose for this donation.</p>:<p id="donation-purpose-help" className="donation-input-help">Describe how you would like this donation used (up to 500 characters).</p>}</div>}
       <div className="donation-type-line"><span className="donation-type-mark" aria-hidden="true"/><span>One-time donation</span></div>
       <div className="donation-total"><span>Your contribution</span><strong>{valid?donationCurrency(parsed.cents!):'Choose an amount'}<small>USD</small></strong></div>
       <button type="submit" className="button donation-continue" disabled={!valid}>Continue to Checkout</button><p className="donation-payment-note">No payment is taken when choosing an amount.</p>

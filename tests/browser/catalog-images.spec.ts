@@ -136,7 +136,7 @@ test('JPG, JPEG, PNG and WebP select, preview and save their optimized URL for G
   expect(uploads).toBe(16);
 });
 
-test('files above 8 MiB stay local and corrupt-image responses are clear', async ({page}) => {
+test('files above 15 MiB stay local and corrupt-image responses are clear', async ({page}) => {
   await mockApi(page);
   let uploads = 0;
   await page.route('**/api/v1/admin/uploads/giving**', route => {
@@ -145,8 +145,8 @@ test('files above 8 MiB stay local and corrupt-image responses are clear', async
   });
   await page.goto('/admin/giving');
   await page.getByRole('button', {name: 'Edit Mangla Seva'}).click();
-  await page.locator('input[type=file]').last().setInputFiles({name: 'large.jpg', mimeType: 'image/jpeg', buffer: Buffer.alloc(8 * 1024 * 1024 + 1)});
-  await expect(page.getByText('The image is too large. Choose a file no larger than 8 MiB.')).toBeVisible();
+  await page.locator('input[type=file]').last().setInputFiles({name: 'large.jpg', mimeType: 'image/jpeg', buffer: Buffer.alloc(15 * 1024 * 1024 + 1)});
+  await expect(page.getByText('The image is too large. Choose a file no larger than 15 MiB.')).toBeVisible();
   expect(uploads).toBe(0);
   page.once('dialog', dialog => dialog.accept());
   await page.locator('input[type=file]').last().setInputFiles({name: 'corrupt.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('corrupt')});
@@ -154,7 +154,7 @@ test('files above 8 MiB stay local and corrupt-image responses are clear', async
   expect(uploads).toBe(1);
 });
 
-test('Giving and Events allow original files below and exactly 8 MiB', async ({page}) => {
+test('Giving and Events allow original files below and exactly 15 MiB', async ({page}) => {
   await mockApi(page);
   let uploads = 0;
   await page.route('**/api/v1/admin/uploads/*', route => {
@@ -162,7 +162,7 @@ test('Giving and Events allow original files below and exactly 8 MiB', async ({p
     return respond(route, 201, {url: image, key: 'events/00000000-0000-4000-8000-000000000001.webp', contentType: 'image/webp', size: 100});
   });
   for (const kind of ['giving', 'events']) {
-    for (const size of [8 * 1024 * 1024 - 1, 8 * 1024 * 1024]) {
+    for (const size of [15 * 1024 * 1024 - 1, 15 * 1024 * 1024]) {
       await page.goto(`/admin/${kind}`);
       await page.getByRole('button', {name: kind === 'giving' ? 'Edit Mangla Seva' : 'Edit Temple Gathering'}).click();
       page.once('dialog', dialog => dialog.accept());

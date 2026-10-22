@@ -61,7 +61,7 @@ test('admin reuses Giving editor for festival options and retains R2 upload cont
     await expect(page.getByLabel('Catalog section')).toHaveValue('utsav');
     await expect(page.getByLabel('Festival group')).toHaveValue('dolotsav');
     await expect(page.getByLabel('Fixed amounts (USD) *',{exact:true})).toHaveValue('1001');
-    await expect(page.getByRole('group',{name:'Catalog image'})).toContainText('Maximum 8 MiB');
+    await expect(page.getByRole('group',{name:'Catalog image'})).toContainText('Maximum 15 MiB');
     await expect(page.getByLabel('Image URL or asset path')).toHaveCount(0);
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     await page.getByRole('button',{name:'Cancel',exact:true}).click();

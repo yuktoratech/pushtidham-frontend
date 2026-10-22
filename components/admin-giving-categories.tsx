@@ -4,15 +4,22 @@ import {catalogApi,imageOwnerSlug,type GivingCategoryRecord} from '../lib/catalo
 import {catalogErrorMessage} from '../lib/catalog-ui';
 import {Dialog,DialogContent,DialogTitle,DialogDescription} from './ui/dialog';
 import {AdminImageField} from './admin-image-field';
+import {useAuth} from './auth-provider';
 
 export function GivingCategoryField({value,onChange,optionalLabel='Unassigned (legacy)'}:{value:string;onChange:(id:string)=>void;optionalLabel?:string}){
  const [rows,setRows]=useState<GivingCategoryRecord[]>([]),[error,setError]=useState('');
- useEffect(()=>{let current=true;catalogApi.adminGivingCategories().then(rows=>{if(current)setRows(rows)}).catch(reason=>{if(current)setError(catalogErrorMessage(reason))});return()=>{current=false}},[]);
+ useEffect(()=>{let current=true;catalogApi.publicGivingCategories().then(rows=>{if(current)setRows(rows)}).catch(reason=>{if(current)setError(catalogErrorMessage(reason))});return()=>{current=false}},[]);
  return <label className="adm-field"><span>Giving category</span><select value={value} onChange={e=>onChange(e.target.value)}><option value="">{optionalLabel}</option>{rows.map(row=><option key={row._id} value={row._id}>{row.name}{row.status==='inactive'?' (inactive)':''}</option>)}</select>{error&&<small role="alert">{error}</small>}</label>;
 }
 type Values={name:string;slug:string;description:string;image:string;status:'active'|'inactive';displayOrder:number};
 const empty:Values={name:'',slug:'',description:'',image:'',status:'active',displayOrder:0};
 export function GivingCategoryManagement(){
+ const {user,status}=useAuth();
+ if(status==='initializing')return <p role="status">Checking category access…</p>;
+ if(user?.canManageGivingCategories!==true)return <div className="adm-empty" role="alert"><h1>Access denied</h1><p>Category management requires developer authorization.</p><a href="/admin">Return to admin overview</a></div>;
+ return <GivingCategoryManagementContent/>;
+}
+function GivingCategoryManagementContent(){
  const [rows,setRows]=useState<GivingCategoryRecord[]>([]),[error,setError]=useState(''),[message,setMessage]=useState(''),[loading,setLoading]=useState(true);
  const [editor,setEditor]=useState<GivingCategoryRecord|null|undefined>(),[values,setValues]=useState<Values>(empty),[busy,setBusy]=useState(false),[uploading,setUploading]=useState(false),[temporary,setTemporary]=useState<string>();
  const load=useCallback(async()=>{setLoading(true);try{setRows(await catalogApi.adminGivingCategories())}catch(reason){setError(catalogErrorMessage(reason))}finally{setLoading(false)}},[]);

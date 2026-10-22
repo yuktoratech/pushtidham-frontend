@@ -1,5 +1,9 @@
 @import "tailwindcss";
 /* Donation selection reuses the existing checkout and donation panel styles. */
+.donation-custom-field textarea{width:100%;min-height:108px;resize:vertical;padding:12px 13px;border:1px solid #d8c49a;border-radius:6px;background:#fffdf7;color:var(--ink);font:inherit;line-height:1.5}
+.donation-custom-field textarea:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.donation-custom-field textarea[aria-invalid=true]{border-color:#a33e2a}
+.donation-purpose-text{white-space:pre-wrap;overflow-wrap:anywhere}
 .donate-page{padding-bottom:64px}.donate-selection-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,440px);gap:28px;align-items:start;padding-bottom:30px}.donate-option-panel{display:grid;gap:22px}.donate-option-panel .checkout-panel-heading{margin-bottom:0}.donate-option-panel select{width:100%;min-height:48px;font:inherit;color:var(--ink);background:#fffdf8;border:1px solid #d9caab;border-radius:5px;padding:11px 12px}.donate-option-panel select:focus{outline:3px solid #ab813c33;border-color:var(--gold)}.donate-description{color:var(--muted);font-size:15px;line-height:1.7}.donate-option-panel .checkout-demo-note{margin:0}.donate-selection-grid .donation-panel{position:static;margin:0;min-width:0}.donation-panel>a.donation-continue{width:100%;margin-top:16px;justify-content:center}
 @media(max-width:900px){.donate-selection-grid{grid-template-columns:1fr;gap:22px}.donate-selection-grid .donation-panel{width:100%}}@media(max-width:600px){.donate-page{padding-bottom:35px}.donate-option-panel select{font-size:16px}.donate-selection-grid{padding-bottom:12px}}
 @theme {--color-haveli-green:#145439;--color-haveli-cream:#fbf5e9;--color-haveli-gold:#ab813c;--font-serif:Georgia,'Times New Roman',serif;}

@@ -7,6 +7,7 @@ export type DonationSelection = {
   givingCategorySlug?: string;
   givingTitle?: string;
   givingId?: string;
+  donationPurpose?: string;
   amountCents: number;
   currency: 'USD';
   donationType: 'one-time';
