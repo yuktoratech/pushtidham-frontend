@@ -20,4 +20,4 @@
 .adm-sidebar .brand-logo{width:48px;height:48px}
 .adm-sidebar .brand>span{font-size:20px}
 .adm-sidebar .brand small{font-size:7px;letter-spacing:.5px}
-@media(max-width:600px){.adm-login .brand-logo{width:48px;height:48px}}
+@media(max-width:600px){.adm-login .brand-logo{width:48px;height:48px}.adm-login>header{gap:10px}.adm-login>header .brand{min-width:0;flex:1}.adm-login .brand>span{font-size:14px;max-width:178px}.adm-login .brand small{font-size:7px;letter-spacing:.2px}.adm-login>header>a:last-child{flex:0 0 auto;max-width:56px;overflow-wrap:anywhere}}
