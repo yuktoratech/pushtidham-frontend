@@ -2,10 +2,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from '../components/auth-provider';
 import { CatalogProvider } from '../components/catalog-provider';
+import { PwaRegister } from '../components/pwa-register';
 
 export const metadata: Metadata = {
   title: "Pushtidham Haveli",
   description: "A place of devotion, seva and community in Ocala, Florida. Discover Pushtidham Haveli.",
+  applicationName: 'Pushtidham Haveli USA',
+  appleWebApp: { capable: true, title: 'Pushtidham', statusBarStyle: 'default' },
   icons: {
     icon: { url: "/favicon.ico", sizes: "16x16 32x32 48x48 64x64", type: "image/x-icon" },
     shortcut: "/favicon.ico",
@@ -20,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased"><AuthProvider><CatalogProvider>{children}</CatalogProvider></AuthProvider></body>
+      <body className="antialiased"><PwaRegister/><AuthProvider><CatalogProvider>{children}</CatalogProvider></AuthProvider></body>
     </html>
   );
 }
