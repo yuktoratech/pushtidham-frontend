@@ -13,6 +13,8 @@ async function mock(page:Page,admin=false,empty=false){
   if(route.request().method()!=='GET'&&!path.endsWith('/auth/refresh'))writes.push(path);
   if(path.includes('/auth/'))return admin?ok(path.endsWith('/refresh')?{accessToken:'isolated-token',user:{id:'admin',name:'Admin',email:'admin@example.test',role:'admin',status:'active'}}:{id:'admin',name:'Admin',email:'admin@example.test',role:'admin',status:'active'}):route.fulfill({status:401,body:'{}'});
   if(path.endsWith('/giving-categories'))return ok(empty?[]:[category,festival]);
+  if(path.endsWith('/giving/mangla-seva'))return ok(giving);
+  if(path.endsWith('/giving/utsav-dolotsav-mukhya-manorathi'))return ok(option);
   if(path.endsWith('/giving'))return ok(empty?[]:url.searchParams.get('categoryId')===festival._id?[option]:url.searchParams.get('categoryId')===category._id?[giving]:[giving,option]);
   if(path.endsWith('/giving/mangla-seva'))return ok(giving);
   if(path.endsWith('/events'))return ok([event]);
@@ -24,12 +26,13 @@ async function mock(page:Page,admin=false,empty=false){
 test('category membership, amount reset, checkout context and payment guard',async({page})=>{
  const writes=await mock(page);
  await page.goto('/donate?giving=mangla-seva');
- await expect(page.getByLabel('Giving opportunity')).toHaveValue(giving.slug);
+ await expect(page.getByRole('group',{name:'Giving opportunity'}).getByRole('button',{name:/Mangla Seva/})).toHaveAttribute('aria-pressed','true');
  await expect(page.getByText('$84.00',{exact:true}).first()).toBeVisible();
- await page.getByRole('button',{name:'Dolotsav',exact:true}).click();
- await expect(page.getByLabel('Giving opportunity')).toHaveValue('');
- await expect(page.getByRole('button',{name:'Continue to Checkout'})).toHaveCount(0);
- await page.getByLabel('Giving opportunity').selectOption(option.slug);
+ await page.getByRole('group',{name:'Donation category'}).getByRole('button',{name:/Utsav/}).click();
+ await page.getByRole('group',{name:'Festival'}).getByRole('button',{name:/Dolotsav/}).click();
+ await expect(page.getByRole('group',{name:'Giving opportunity'}).getByRole('button',{name:/Mangla Seva/})).toHaveCount(0);
+ await expect(page.getByRole('button',{name:'Continue to Checkout'})).toBeDisabled();
+ await page.getByRole('button',{name:/Mukhya Manorathi/}).click();
  await expect(page.getByText('$1,001.00',{exact:true}).first()).toBeVisible();
  await page.getByRole('button',{name:'Continue to Checkout'}).click();
  await expect(page).toHaveURL(new RegExp('categoryId='+festival._id));
@@ -47,7 +50,7 @@ test('category selection and gallery remain usable at all approved widths',async
  await mock(page);
  for(const width of [320,375,390,430,768,1024,1440]){
   await page.setViewportSize({width,height:900});await page.goto('/donate');
-  await expect(page.getByRole('button',{name:'Daily Seva',exact:true})).toBeVisible();
+  await expect(page.getByRole('group',{name:'Donation category'}).getByRole('button',{name:/Daily Seva/})).toBeVisible();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
   await page.goto('/events/festival-details');
   await expect(page.getByRole('button',{name:'Next image'})).toBeVisible();
@@ -70,12 +73,9 @@ test('gallery reduced motion, keyboard, play and slide indicators',async({page})
  await gallery.dispatchEvent('pointerup',{pointerType:'touch',clientX:100});
  await expect(page.getByRole('button',{name:'Show image 2'})).toHaveAttribute('aria-current','true');
 });
-test('admin categories and Event gallery previews use isolated reads only',async({page})=>{
+test('category management is developer-only and Event gallery previews use isolated reads only',async({page})=>{
  const writes=await mock(page,true);
- await page.goto('/admin/giving-categories');await expect(page.getByRole('heading',{name:'Giving Categories'})).toBeVisible();
- await page.getByRole('button',{name:'Add Category'}).click();
- await expect(page.getByLabel('Name',{exact:true})).toBeVisible();
- await page.getByRole('button',{name:'Cancel',exact:true}).click();
+ await page.goto('/admin/giving-categories');await expect(page.getByRole('heading',{name:'Access denied'})).toBeVisible();
  await page.goto('/admin/events');await page.getByRole('button',{name:'Edit Festival details'}).click();
  await expect(page.getByLabel('Select gallery images')).toHaveAttribute('multiple','');
  await expect(page.getByRole('button',{name:'Use as cover'})).toBeVisible();
@@ -116,14 +116,12 @@ test('gallery upload failure, retry, cover and ordering use mocked storage only'
  expect((saved?.gallery as {url:string}[]).map(row=>row.url)).toEqual(['/images/temple.webp','/images/darshan.webp','/images/annakut.webp']);
 });
 
-test('admin category, Giving and Event editors fit mobile and desktop',async({page})=>{
+test('developer-only category route and Giving/Event editors fit mobile and desktop',async({page})=>{
  await mock(page,true);
  for(const width of [320,768,1440]){
   await page.setViewportSize({width,height:900});
-  await page.goto('/admin/giving-categories');await page.getByRole('button',{name:'Add Category'}).click();
-  await expect(page.getByLabel('Name',{exact:true})).toBeVisible();
+  await page.goto('/admin/giving-categories');await expect(page.getByRole('heading',{name:'Access denied'})).toBeVisible();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
-  await page.getByRole('button',{name:'Cancel',exact:true}).click();
   await page.goto('/admin/giving');await page.getByRole('button',{name:'Edit Mangla Seva'}).click();
   await expect(page.getByRole('dialog').getByRole('combobox',{name:'Giving category',exact:true})).toHaveValue(category._id);
   await expect(page.getByRole('dialog').getByRole('combobox',{name:'Status *',exact:true})).toHaveValue('active');

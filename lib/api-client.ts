@@ -234,16 +234,14 @@ export async function downloadAuthorized(path: string, fallbackName: string): Pr
   link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 30000);
 }
-export type PaymentMethodFamily = "card" | "ach";
+export type PaymentMethodFamily = "card";
 export type PaymentAttemptStatus = "created" | "requires_action" | "verification_pending" | "processing" | "succeeded" | "failed" | "canceled";
-export type PaymentStart = { attemptId:string; status:PaymentAttemptStatus; baseDonationCents:number; feeContributionCents:number; totalChargeCents:number; currency:"USD"; statusToken?:string; checkoutUrl?:string; orderId?:string; approvalUrl?:string };
+export type PaymentStart = { attemptId:string; status:PaymentAttemptStatus; baseDonationCents:number; feeContributionCents:number; totalChargeCents:number; currency:"USD"; statusToken?:string; checkoutUrl?:string };
 export type PaymentStatus = { id:string; status:PaymentAttemptStatus; baseDonationCents:number; feeContributionCents:number; totalChargeCents:number; currency:"USD" };
-export type PaymentCapabilities = {stripe:{card:boolean;ach:boolean};paypal:{enabled:boolean;clientId?:string;environment:"sandbox"|"live";venmo:boolean}};
+export type PaymentCapabilities = {stripe:{card:boolean}};
 export const paymentApi={
  capabilities:()=>apiRequest<PaymentCapabilities>("/payments/capabilities"),
  stripe:(body:object,key:string)=>apiRequest<PaymentStart>("/payments/stripe/checkout-sessions",{method:"POST",headers:{"Idempotency-Key":key},body:JSON.stringify(body)}),
- paypalOrder:(body:object,key:string)=>apiRequest<PaymentStart>("/payments/paypal/orders",{method:"POST",headers:{"Idempotency-Key":key},body:JSON.stringify(body)}),
- paypalCapture:(orderId:string,token?:string)=>apiRequest<{attemptId:string;status:string}>(`/payments/paypal/orders/${encodeURIComponent(orderId)}/capture`,{method:"POST",headers:token?{"X-Payment-Status-Token":token}:undefined,body:"{}"}),
  status:(attemptId:string,token?:string)=>apiRequest<PaymentStatus>(`/payments/attempts/${encodeURIComponent(attemptId)}/status`,{headers:token?{"X-Payment-Status-Token":token}:undefined}),
 };
 export type DonationDisplayStatus="created"|"requires_action"|"verification_required"|"processing"|"succeeded"|"failed"|"canceled"|"pending"|"completed"|"refunded"|"partially_refunded"|"returned"|"disputed";

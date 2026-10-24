@@ -3,12 +3,13 @@ const stamp='2026-10-19T12:00:00Z';
 const daily=[['mangla-seva','Mangla Seva',8400],['palna-seva','Palna Seva',15100],['silver-palna-seva','Silver Palna Seva',20100],['rajbhog-seva','Rajbhog Seva',30100],['gold-palna-seva','Golden Palna Seva',25100],['shayan-seva','Shayan Palna',10100],['whole-day-manorathi','Whole Day Seva',40100]] as const;
 const festivalGroups={dolotsav:'Dolotsav','pragatya-divas-maha-bhog':'Pragatya Divas / Maha Bhog','nand-mahotsav':'Nand Mahotsav','adhikmas-hindola':'Adhikmas / Hindola',annakut:'Annakut'};
 const common=[['Mukhya Manorathi',100100],['Sahayak Manorathi',50100],['Palana',15100]] as const;
-const giving=daily.map(([slug,title,amount],index)=>({_id:'daily-'+index,slug,title,category:'daily_seva',festivalGroup:'',amountType:'fixed',fixedAmountsCents:[amount],status:'active',displayOrder:index,description:'Client-confirmed seva.',image:'',createdAt:stamp,updatedAt:stamp}));
+const categories=[{_id:'daily-id',name:'Daily Seva',slug:'daily-seva',description:'Daily seva',image:'',status:'active' as const,displayOrder:0,createdAt:stamp,updatedAt:stamp},...Object.entries(festivalGroups).map(([slug,name],index)=>({_id:'festival-'+slug,name,slug,description:name,image:'',status:'active' as const,displayOrder:index+1,createdAt:stamp,updatedAt:stamp})),{_id:'general-id',name:'General Donation',slug:'general-donation',description:'General donations',image:'',status:'active' as const,displayOrder:8,createdAt:stamp,updatedAt:stamp}];
+const giving=daily.map(([slug,title,amount],index)=>({_id:'daily-'+index,slug,title,categoryId:'daily-id',category:'daily_seva' as const,festivalGroup:'',amountType:'fixed' as const,fixedAmountsCents:[amount],status:'active' as const,displayOrder:index,description:'Client-confirmed seva.',image:'',createdAt:stamp,updatedAt:stamp}));
 const utsav=Object.keys(festivalGroups).flatMap((key)=>{
   const options=key==='adhikmas-hindola'?[['Weekday Manorathi',22500],['Weekend Manorathi',35100]]:key==='annakut'?[['Mukhya Manorathi',300100],['Sahayak Manorathi',200100],['Sha-Sahayak Manorathi',100100],['Manorathi',20100]]:common;
-  return options.map(([title,amount],index)=>({...giving[0],_id:'utsav-'+key+'-'+index,slug:'utsav-'+key+'-'+String(title).toLowerCase().replaceAll(' ','-'),title,category:'utsav',festivalGroup:key,fixedAmountsCents:[amount]}));
+  return options.map(([title,amount],index)=>({...giving[0],_id:'utsav-'+key+'-'+index,categoryId:'festival-'+key,slug:'utsav-'+key+'-'+String(title).toLowerCase().replaceAll(' ','-'),title,category:'utsav' as const,festivalGroup:key,fixedAmountsCents:[amount]}));
 });
-const all=[...giving,...utsav,{...giving[0],_id:'mahaprasad',slug:'mahaprasad-manorathi',title:'Mahaprasad Manorathi',category:'general',fixedAmountsCents:[50100]}];
+const all=[...giving,...utsav,{...giving[0],_id:'mahaprasad',categoryId:'general-id',slug:'mahaprasad-manorathi',title:'Mahaprasad Manorathi',category:'general' as const,fixedAmountsCents:[50100]}];
 async function mockApi(page:Page,admin=false) {
   await page.route('**/api/v1/**',route=>{
     const path=new URL(route.request().url()).pathname;
@@ -18,6 +19,8 @@ async function mockApi(page:Page,admin=false) {
       const user={id:'fixture-admin',name:'Fixture Admin',email:'fixture@example.test',role:'admin',status:'active'};
       return ok(path.endsWith('/refresh')?{accessToken:'fixture-only',user}:user);
     }
+    if(path.endsWith('/giving-categories'))return ok(categories);
+    if(path.startsWith('/api/v1/giving/'))return ok(all.find(row=>row.slug===path.split('/').pop())||all[0]);
     if(path.endsWith('/giving'))return ok(all);
     if(path.endsWith('/events'))return ok([]);
     return route.fulfill({status:404,body:'{}'});
@@ -43,11 +46,12 @@ test('five Utsav groups and fifteen options preserve Event selection and fixed p
     const card=page.locator('.utsav-card').filter({has:page.getByRole('heading',{name:'Annakut',exact:true})});
     await expect(card).toContainText('Mukhya Manorathi — $3,001.00');
     await card.getByRole('link',{name:'Mukhya Manorathi — $3,001.00',exact:true}).click();
-    await expect(page.getByLabel('Category',{exact:true})).toHaveValue('Event');
-    await expect(page.getByLabel('Donation For')).toHaveValue('utsav:utsav-annakut-mukhya-manorathi');
+    await expect(page.getByRole('group',{name:'Donation category'}).getByRole('button',{name:'Utsav'})).toHaveAttribute('aria-pressed','true');
+    await expect(page.getByRole('group',{name:'Festival'}).getByRole('button',{name:'Annakut'})).toHaveAttribute('aria-pressed','true');
+    await expect(page.getByRole('group',{name:'Giving opportunity'}).getByRole('button',{name:/Mukhya Manorathi/})).toHaveAttribute('aria-pressed','true');
     await expect(page.locator('.donation-amount-option')).toHaveCount(1);
     await expect(page.getByLabel('Custom amount (USD)')).toHaveCount(0);
-    await page.reload();await expect(page.getByLabel('Donation For')).toHaveValue('utsav:utsav-annakut-mukhya-manorathi');
+    await page.reload();await expect(page.getByRole('group',{name:'Giving opportunity'}).getByRole('button',{name:/Mukhya Manorathi/})).toHaveAttribute('aria-pressed','true');
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     await expect(page.getByText('Online payments are currently unavailable for this client demo.')).toBeVisible();
   }

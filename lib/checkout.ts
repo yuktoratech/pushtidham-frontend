@@ -3,16 +3,14 @@ import { donationQuery, amountMatchesOpportunity, donationSelectionKey, type Don
 import type { DemoDonor } from './account-demo';
 import {festivalName} from './seva';
 
-export type PaymentMethod = 'card' | 'ach' | 'paypal' | 'venmo' | 'bank-transfer';
-export type CheckoutDraft = {donor:DemoDonor;method:PaymentMethod;transactionReference:string;donorMode:'guest'|'demo'};
+export type CheckoutDraft = {donor:DemoDonor;donorMode:'guest'|'demo';coverFees:boolean};
 export const checkoutDraftKey='pushthidham-checkout-draft';
 export const pendingPaymentKey='pushthidham-pending-payment';
-export type PendingPayment={attemptId:string;statusToken?:string;provider:'stripe'|'paypal';orderId?:string;createdAt:number;donationPurpose?:string;captureState?:'not_requested'|'requested'|'resolved'|'uncertain'};
+export type PendingPayment={attemptId:string;statusToken?:string;provider:'stripe';createdAt:number;donationPurpose?:string};
 export function savePendingPayment(value:PendingPayment){sessionStorage.setItem(pendingPaymentKey,JSON.stringify(value));}
 export function readPendingPayment(){try{return JSON.parse(sessionStorage.getItem(pendingPaymentKey)||'null') as PendingPayment|null}catch{return null}}
 export function newIdempotencyKey(){return `checkout-${crypto.randomUUID()}`;}
 export const emptyDonor:DemoDonor={firstName:'',lastName:'',email:'',phone:''};
-export const bankTransferPreview={bankName:'To be provided by temple',accountName:'To be provided by temple',accountNumber:'To be provided',routingNumber:'To be provided',demoReference:'PHD-DEMO-001'};
 export type DonationCatalog={giving:(GivingOpportunity & {active?:boolean})[];events:TempleEvent[]};
 export function readDonationSelection(query:URLSearchParams,catalog:DonationCatalog):DonationSelection|null{
   const amount=Number(query.get('amount'));
@@ -58,12 +56,11 @@ export function donationContext(selection:DonationSelection,catalog:DonationCata
 }
 
 export function editDonationPath(selection:DonationSelection){return `/donate?${donationQuery(selection)}`;}
-export function validateCheckout(donor:DemoDonor,method:PaymentMethod,reference:string){
-  const errors:Partial<Record<keyof DemoDonor|'transactionReference',string>>={};
+export function validateCheckout(donor:DemoDonor){
+  const errors:Partial<Record<keyof DemoDonor,string>>={};
   if(!donor.firstName.trim())errors.firstName='Please enter your first name.';
   if(!donor.lastName.trim())errors.lastName='Please enter your last name.';
   if(!donor.email.trim())errors.email='Please enter your email address.';
   else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(donor.email.trim()))errors.email='Please enter a valid email address.';
-  if(method==='bank-transfer'&&!reference.trim())errors.transactionReference='Please enter a transaction reference or confirmation number.';
   return errors;
 }
