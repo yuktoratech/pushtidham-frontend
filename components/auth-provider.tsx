@@ -17,6 +17,7 @@ import {
   logout,
   type AuthState,
 } from "../lib/auth-state";
+import { refreshSession } from "../lib/api-client";
 const AuthContext = createContext<
   | (AuthState & {
       login: typeof login;
@@ -39,9 +40,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
     window.addEventListener("focus", check);
     document.addEventListener("visibilitychange", check);
+    const keepActiveSession = window.setInterval(() => {
+      if (getAuthState().status === "authenticated")
+        void refreshSession().catch(() => {
+          // Offline and expired sessions are handled by the next protected request.
+        });
+    }, 10 * 60 * 1000);
     return () => {
       window.removeEventListener("focus", check);
       document.removeEventListener("visibilitychange", check);
+      window.clearInterval(keepActiveSession);
     };
   }, []);
   return (

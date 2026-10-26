@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "../components/visitor-experience.css";
 import { AuthProvider } from '../components/auth-provider';
 import { CatalogProvider } from '../components/catalog-provider';
 import { PwaRegister } from '../components/pwa-register';

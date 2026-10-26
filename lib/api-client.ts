@@ -150,12 +150,17 @@ export async function apiRequest<T>(
       (path.startsWith("/auth/") && path !== "/auth/me")
     )
       throw error;
-    if (usedRevision !== revision)
+    if (usedRevision !== revision) {
+      // A refresh or sign-in can replace the token while a read is in flight.
+      // Retry only safe reads with the current token; logout clears it.
+      if (accessToken && (!options.method || options.method.toUpperCase() === "GET"))
+        return await send<T>(path, options);
       throw new ApiError(
         401,
         "SESSION_CHANGED",
         "Your session changed. Please try again.",
       );
+    }
     try {
       if (accessToken === usedToken) await refreshSession();
       return await send<T>(path, options);

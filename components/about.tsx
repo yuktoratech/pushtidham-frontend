@@ -2,11 +2,12 @@ import {CatalogImage} from './catalog-image';
 import {PageLink} from './page-link';
 import type {LucideIcon} from 'lucide-react';
 import {ChevronRight, Flower2, HandHeart, HeartHandshake, MapPin, Music2, Shirt, Utensils, UsersRound} from 'lucide-react';
+import {homeSlides} from '../lib/home-slides';
 import {templeContact} from '../lib/contact';
 
 export function AboutHero() {
   return <section className="about-page-hero about-premium-hero" aria-labelledby="about-title">
-    <CatalogImage src="/images/devotional-hero.webp" alt="Illustrative devotional artwork of Shri Krishna in a Haveli setting" />
+    <CatalogImage src={homeSlides[1].src} alt={homeSlides[1].alt} />
     <div className="about-page-hero-shade" />
     <div className="container about-page-hero-content"><p className="eyebrow">Pushti Margiya Vaishnav Samaj Inc.</p><h1 id="about-title">About Pushtidham Haveli</h1><p>A welcoming spiritual home for bhakti, seva and community in Ocala, Florida.</p></div>
   </section>;

@@ -122,6 +122,28 @@ test("an old refresh response cannot overwrite a newer login token", async (t) =
   await assert.rejects(old, (error) => error.code === "SESSION_CHANGED");
   assert.ok((await api.apiRequest("/private")).ok);
 });
+test("a read started with an expired token uses a newer valid login token", async (t) => {
+  const api = await client();
+  const oldVersion = api.beginAuthChange();
+  api.acceptAccessToken("old-token", oldVersion);
+  let release;
+  const waiting = new Promise((resolve) => { release = resolve; });
+  t.mock.method(globalThis, "fetch", async (url, options) => {
+    const token = new Headers(options.headers).get("Authorization");
+    if (token === "Bearer old-token") {
+      await waiting;
+      return response(null, 401);
+    }
+    assert.equal(token, "Bearer new-token");
+    return response({ ok: true });
+  });
+  const request = api.apiRequest("/private");
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  const newVersion = api.beginAuthChange();
+  api.acceptAccessToken("new-token", newVersion);
+  release();
+  assert.ok((await request).ok);
+});
 test("logout never hides backend failure by refreshing and network errors are normalized", async (t) => {
   const api = await client();
   let requests = 0;
