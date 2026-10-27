@@ -247,7 +247,15 @@ export type PaymentCapabilities = {stripe:{card:boolean}};
 export const paymentApi={
  capabilities:()=>apiRequest<PaymentCapabilities>("/payments/capabilities"),
  stripe:(body:object,key:string)=>apiRequest<PaymentStart>("/payments/stripe/checkout-sessions",{method:"POST",headers:{"Idempotency-Key":key},body:JSON.stringify(body)}),
- status:(attemptId:string,token?:string)=>apiRequest<PaymentStatus>(`/payments/attempts/${encodeURIComponent(attemptId)}/status`,{headers:token?{"X-Payment-Status-Token":token}:undefined}),
+ status:async(attemptId:string,token?:string)=>{
+  const path=`/payments/attempts/${encodeURIComponent(attemptId)}/status`;
+  // Historical guest attempts use their scoped token, even when a donor has since signed in.
+  if(token)return send<PaymentStatus>(path,{headers:{"X-Payment-Status-Token":token}},null);
+  // Returning from Stripe reloads the document and clears the in-memory access token.
+  // Restore authentication before calling the optional-auth status endpoint.
+  if(!accessToken)await refreshSession();
+  return apiRequest<PaymentStatus>(path);
+ },
 };
 export type DonationDisplayStatus="created"|"requires_action"|"verification_required"|"processing"|"succeeded"|"failed"|"canceled"|"pending"|"completed"|"refunded"|"partially_refunded"|"returned"|"disputed";
 export type DonationRecord={id:string;donationNumber:string;type:"general"|"event";designationTitle:string;donationPurpose?:string|null;festivalTitle?:string|null;donationOptionTitle?:string|null;baseDonationCents:number;feeContributionCents:number|null;grossChargedCents:number|null;actualProviderFeeCents:number|null;adjustmentLossCents:number;netProceedsCents:number|null;currency:"USD";paymentProvider:"stripe"|"paypal"|null;paymentMethod:string;paymentLifecycle:PaymentAttemptStatus|null;displayStatus:DonationDisplayStatus;donationStatus:"pending"|"completed"|"rejected";recordKind:"verified_online"|"legacy_paypal"|"legacy_bank_transfer"|"legacy_online"|"offline";providerVerified:boolean;createdAt:string;completedAt?:string;donor?:{name:string;email:string;phone:string|null};references?:{external:string|null;bank:string|null;offline:string|null;payment:string|null};adjustments?:Array<{type:string;status:string;amountCents:number;occurredAt:string;reasonCode:string|null;providerReference:string}>};

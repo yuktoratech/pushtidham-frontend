@@ -6,8 +6,10 @@ import {PageLink} from './page-link';
 import {paymentApi,type PaymentAttemptStatus} from '../lib/api-client';
 import {readPendingPayment,type PendingPayment} from '../lib/checkout';
 import {donationCurrency} from '../lib/donation-selection';
+import {useAuth} from './auth-provider';
 
 function IntegratedDonationConfirmation(){
+ const auth=useAuth();
  const [context,setContext]=useState<PendingPayment|null>(null);
  const [status,setStatus]=useState<PaymentAttemptStatus|null>(null);
  const [amount,setAmount]=useState<number|null>(null);
@@ -22,6 +24,7 @@ function IntegratedDonationConfirmation(){
   finally{setChecking(false)}
  },[]);
  useEffect(()=>{
+  if(auth.status==='initializing')return;
   const value=readPendingPayment();
   let active=true;
   queueMicrotask(()=>{
@@ -33,7 +36,7 @@ function IntegratedDonationConfirmation(){
    setContext(value);void refresh(value);
   });
   return()=>{active=false};
- },[refresh]);
+ },[refresh,auth.status]);
  useEffect(()=>{
   if(!context||!['created','requires_action','verification_pending','processing'].includes(status||''))return;
   let count=0;
@@ -45,8 +48,8 @@ function IntegratedDonationConfirmation(){
   <div className={`donation-confirmation-icon ${waiting?'is-pending':''}`}>{completed?<Check/>:failed?<XCircle/>:<Clock3/>}</div>
   <p className="eyebrow">Backend-verified card payment status</p>
   <span className={`donation-confirmation-status ${waiting?'is-pending':''}`}>{checking?'Checking…':status||'Unavailable'}</span>
-  <h1>{completed?'Thank You':failed?'Payment Not Completed':'Payment Pending'}</h1>
-  <p className="donation-confirmation-intro">{completed?'Your card payment was confirmed by Stripe.':failed?'Your card payment was not completed. You may return to checkout and try again.':'Your card payment is being verified. Please check again shortly.'}</p>
+  <h1>{completed?'Thank You':failed?'Payment Not Completed':error&&!status?'Payment Status Unavailable':'Payment Pending'}</h1>
+  <p className="donation-confirmation-intro">{completed?'Your card payment was confirmed by Stripe.':failed?'Your card payment was not completed. You may return to checkout and try again.':error&&!status?'We could not retrieve your payment status. This does not mean your payment failed. Please do not pay again.':'Your card payment is being verified. Please check again shortly.'}</p>
   {context?.donationPurpose&&<p className="donation-purpose-text"><strong>Donation purpose:</strong> {context.donationPurpose}</p>}
   {amount!==null&&<div className="donation-confirmation-amount"><small>Total charged · USD</small><strong>{donationCurrency(amount)}</strong></div>}
   {error&&<p className="donation-confirmation-note" role="alert"><Info/><span>{error}</span></p>}

@@ -163,3 +163,39 @@ test("logout never hides backend failure by refreshing and network errors are no
     (error) => error.code === "NETWORK_ERROR",
   );
 });
+
+test('account payment status restores authentication before the first status request', async (t) => {
+ const api=await client();
+ const calls=[];
+ t.mock.method(globalThis,'fetch',async(url,options)=>{
+  calls.push(url);
+  if(url.endsWith('/auth/refresh'))return response({accessToken:'restored-test-token',user:{role:'donor'}});
+  assert.equal(new Headers(options.headers).get('Authorization'),'Bearer restored-test-token');
+  return response({status:'succeeded',totalChargeCents:100});
+ });
+ assert.equal((await api.paymentApi.status('test-attempt')).status,'succeeded');
+ assert.equal(calls.length,2);
+ assert.ok(calls[0].endsWith('/auth/refresh'));
+});
+
+test('historical guest status uses only the scoped token even after login', async (t) => {
+ const api=await client();
+ api.acceptAccessToken('signed-in-test-token',api.getSessionRevision());
+ t.mock.method(globalThis,'fetch',async(url,options)=>{
+  assert.ok(url.endsWith('/payments/attempts/test-attempt/status'));
+  assert.equal(new Headers(options.headers).has('Authorization'),false);
+  assert.equal(new Headers(options.headers).get('X-Payment-Status-Token'),'guest-status-test-token');
+  return response({status:'succeeded'});
+ });
+ assert.equal((await api.paymentApi.status('test-attempt','guest-status-test-token')).status,'succeeded');
+});
+
+test('expired account session does not fall back to anonymous payment lookup', async(t)=>{
+ const api=await client();
+ let calls=0;
+ t.mock.method(globalThis,'fetch',async(url)=>{
+  calls++;assert.ok(url.endsWith('/auth/refresh'));return response(null,401);
+ });
+ await assert.rejects(api.paymentApi.status('test-attempt'),error=>error.status===401);
+ assert.equal(calls,1);
+});
