@@ -23,6 +23,7 @@ const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
 let accessToken: string | null = null;
 let revision = 0;
 let refreshPromise: Promise<AuthResult> | null = null;
+let refreshRevision: number | null = null;
 let onInvalidSession: () => void = () => {};
 export function setSessionListener(listener: () => void) {
   onInvalidSession = listener;
@@ -107,9 +108,21 @@ async function send<T>(
   return payload.data as T;
 }
 export function refreshSession(): Promise<AuthResult> {
-  if (refreshPromise) return refreshPromise;
+  if (refreshPromise) {
+    if (refreshRevision === revision) return refreshPromise;
+    const waitingRevision = revision;
+    // Let an older rotation finish before restoring the current identity.
+    // Its response cannot authenticate the newer revision, but its cookie may rotate.
+    return refreshPromise.catch(() => undefined).then(() => {
+      if (waitingRevision !== revision)
+        throw new ApiError(401, 'SESSION_CHANGED', 'Your session changed. Please try again.');
+      return refreshSession();
+    });
+  }
   const version = revision;
   const refresh = async () => {
+    if (version !== revision)
+      throw new ApiError(401, 'SESSION_CHANGED', 'Your session changed. Please try again.');
     const result = await send<AuthResult>(
       "/auth/refresh",
       { method: "POST", body: "{}" },
@@ -131,7 +144,9 @@ export function refreshSession(): Promise<AuthResult> {
   })();
   const shared = pending.finally(() => {
     refreshPromise = null;
+    refreshRevision = null;
   });
+  refreshRevision = version;
   refreshPromise = shared;
   return shared;
 }
@@ -260,7 +275,7 @@ export const paymentApi={
 export type DonationDisplayStatus="created"|"requires_action"|"verification_required"|"processing"|"succeeded"|"failed"|"canceled"|"pending"|"completed"|"refunded"|"partially_refunded"|"returned"|"disputed";
 export type OfflineDonor={id:string;name:string;email:string;phone:string;setupRequired:boolean;welcomeEmailStatus:string|null};
 export type OfflineSave={id:string;donationNumber:string;donor:OfflineDonor;replayed:boolean};
-export type DonationRecord={offlinePaymentMethod?:"cash"|"check"|"other"|null;id:string;donationNumber:string;type:"general"|"event";designationTitle:string;donationPurpose?:string|null;festivalTitle?:string|null;donationOptionTitle?:string|null;baseDonationCents:number;feeContributionCents:number|null;grossChargedCents:number|null;actualProviderFeeCents:number|null;adjustmentLossCents:number;netProceedsCents:number|null;currency:"USD";paymentProvider:"stripe"|"paypal"|null;paymentMethod:string;paymentLifecycle:PaymentAttemptStatus|null;displayStatus:DonationDisplayStatus;donationStatus:"pending"|"completed"|"rejected";recordKind:"verified_online"|"legacy_paypal"|"legacy_bank_transfer"|"legacy_online"|"offline";providerVerified:boolean;createdAt:string;completedAt?:string;donor?:{name:string;email:string;phone:string|null};references?:{external:string|null;bank:string|null;offline:string|null;payment:string|null};adjustments?:Array<{type:string;status:string;amountCents:number;occurredAt:string;reasonCode:string|null;providerReference:string}>};
+export type DonationRecord={offlinePaymentMethod?:"cash"|"check"|"other"|null;id:string;donationNumber:string;type:"general"|"event";designationTitle:string;donationPurpose?:string|null;festivalTitle?:string|null;donationOptionTitle?:string|null;baseDonationCents:number;feeContributionCents:number|null;grossChargedCents:number|null;actualProviderFeeCents:number|null;adjustmentLossCents:number;netProceedsCents:number|null;currency:"USD";paymentProvider:"stripe"|"paypal"|null;paymentMethod:string;paymentLifecycle:PaymentAttemptStatus|null;displayStatus:DonationDisplayStatus;donationStatus:"pending"|"completed"|"rejected";recordKind:"online"|"verified_online"|"legacy_paypal"|"legacy_bank_transfer"|"legacy_online"|"offline";providerVerified:boolean;receiptEligible?:boolean;adjustmentStatus?:"returned"|"disputed"|"refunded"|"partially_refunded"|null;createdAt:string;completedAt?:string;donor?:{name:string;email:string;phone:string|null};references?:{external:string|null;bank:string|null;offline:string|null;payment:string|null};adjustments?:Array<{type:string;status:string;amountCents:number;occurredAt:string;reasonCode:string|null;providerReference:string}>};
 export type FinancialReport={timezone:"UTC";range:{from:string|null;to:string|null};summary:{records:number;confirmedRecords:number;confirmedBaseCents:number;feeContributionCents:number;grossConfirmedCents:number;knownProviderFeesCents:number;unknownProviderFeeRecords:number;adjustmentLossCents:number;netProceedsKnownCents:number;netUnknownRecords:number;pendingBaseCents:number;failedCanceledBaseCents:number};providers:Array<{provider:string;records:number;baseDonationCents:number;grossChargedCents:number;adjustmentLossCents:number}>;designations:Array<{designation:string;records:number;baseDonationCents:number;grossChargedCents:number}>};
 export const donationApi={
  list:(query="")=>apiRequest<DonationRecord[]>(`/donations${query?`?${query}`:""}`),

@@ -144,6 +144,27 @@ test("a read started with an expired token uses a newer valid login token", asyn
   release();
   assert.ok((await request).ok);
 });
+test('restoration waits for an obsolete refresh before rotating the current session', async t => {
+  const api = await client();
+  let release;
+  const paused = new Promise(resolve => { release = resolve; });
+  let calls = 0;
+  t.mock.method(globalThis, 'fetch', async () => {
+    calls++;
+    if (calls === 1) await paused;
+    return response({accessToken: calls === 1 ? 'obsolete-token' : 'restored-token', user: {role: 'donor'}});
+  });
+  const old = api.refreshSession();
+  const rejected = assert.rejects(old, error => error.code === 'SESSION_CHANGED');
+  await new Promise(resolve => setTimeout(resolve, 0));
+  api.beginAuthChange();
+  const restored = api.refreshSession();
+  assert.equal(calls, 1);
+  release();
+  await rejected;
+  assert.equal((await restored).accessToken, 'restored-token');
+  assert.equal(calls, 2);
+});
 test("logout never hides backend failure by refreshing and network errors are normalized", async (t) => {
   const api = await client();
   let requests = 0;
