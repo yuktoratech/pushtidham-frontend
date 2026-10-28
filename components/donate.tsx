@@ -1,52 +1,77 @@
 'use client';
+import './catalog-enhancements.css';
+import './donate-experience.css';
+import {useEffect, useState} from 'react';
+import {donationGroups,festivalCategorySlugs} from '../lib/donation-groups';
+import {HandHeart} from 'lucide-react';
+import {catalogApi, type GivingCategoryRecord, type GivingRecord} from '../lib/catalog-api';
+import {givingView, catalogErrorMessage} from '../lib/catalog-ui';
+import {DonationPanel} from './donation-panel';
+import {CatalogImage} from './catalog-image';
+import {clientDemoPaymentsDeferred, PaymentDemoNotice} from './payment-demo-notice';
 
-import { useState } from 'react';
-import { ChevronRight, HandHeart, Info } from 'lucide-react';
-import { useAdminDemo } from '../hooks/use-admin-demo';
-import { eventDate } from '../lib/events';
-import { donatePath, eventDonationPath, type DonationCategory } from '../lib/donation-selection';
-import { DonationPanel } from './donation-panel';
-import { PageLink } from './page-link';
-
-export function Donate(){
-  const {data,ready}=useAdminDemo();
-  const giving=data.giving.filter(g=>g.active);
-  const events=data.events.filter(e=>!e.past);
-  const [category,setCategory]=useState<DonationCategory>('General');
-  const [selected,setSelected]=useState('general-donation');
-  const [initialized,setInitialized]=useState(false);
+export function Donate() {
+  const [categories,setCategories]=useState<GivingCategoryRecord[]>([]);
+  const [options,setOptions]=useState<GivingRecord[]>([]);
+  const [category,setCategory]=useState('');
+  const [group,setGroup]=useState('');
+  const [selected,setSelected]=useState('');
+  const [loading,setLoading]=useState(true);
+  const [optionsLoading,setOptionsLoading]=useState(false);
+  const [error,setError]=useState('');
   const [notice,setNotice]=useState('');
-  const defaultGiving=giving.find(g=>g.slug==='general-donation')?.slug||giving[0]?.slug||'';
-  if(ready&&!initialized){
-    setInitialized(true);
-    const query=new URLSearchParams(window.location.search);
-    const event=query.get('event');
-    const isEvent=query.get('category')==='event'||(query.get('category')!=='general'&&!!event);
-    const requested=isEvent?event:query.get('giving')||query.get('opportunity');
-    const options=isEvent?events:giving;
-    setCategory(isEvent?'Event':'General');
-    setSelected(options.some(item=>item.slug===requested)?requested!:(isEvent?events[0]?.slug||'':defaultGiving));
-    if(requested&&!options.some(item=>item.slug===requested))setNotice('That donation option is unavailable. Please choose an available option.');
+  const [retry,setRetry]=useState(0);
+  useEffect(()=>{
+    let current=true;
+    (async()=>{
+      try {
+        const rows=await catalogApi.publicGivingCategories();
+        const query=new URLSearchParams(window.location.search);
+        let chosen=rows.find(c=>c.slug===query.get('givingCategory')||c._id===query.get('categoryId'));
+        const slug=query.get('giving')||query.get('opportunity');
+        let giving:GivingRecord|undefined;
+        if(slug) {
+          try{giving=await catalogApi.publicGivingBySlug(slug);}catch{}
+          chosen=rows.find(c=>c._id===giving?.categoryId)||chosen;
+        }
+        if(!current)return;
+        setCategories(rows);setOptionsLoading(Boolean(chosen));setCategory(chosen?._id||'');setGroup(chosen?(['daily-seva','general-donation'].includes(chosen.slug)?chosen.slug:'utsav'):'');
+        setSelected(giving?.slug||'');
+        if(query.has('event'))setNotice('Events are information only. Please choose a Giving opportunity.');
+        else if((slug&&(!giving||!chosen))||((query.has('givingCategory')||query.has('categoryId'))&&!chosen))setNotice('That selection is unavailable. Please choose an available category and Giving option.');
+      }catch(reason){if(current)setError(catalogErrorMessage(reason));}
+      finally{if(current)setLoading(false);}
+    })();
+    return()=>{current=false};
+  },[retry]);
+  useEffect(()=>{
+    if(!category)return;
+    let current=true;
+    catalogApi.publicGiving(category).then(rows=>{if(current)setOptions(rows.filter(g=>g.status==='active'&&g.categoryId===category))}).catch(reason=>{if(current)setError(catalogErrorMessage(reason))}).finally(()=>{if(current)setOptionsLoading(false)});
+    return()=>{current=false};
+  },[category,retry]);
+  const chosen=categories.find(c=>c._id===category);
+  const opportunity=options.find(g=>g.slug===selected);
+  function chooseCategory(id:string){
+    setCategory(id);setSelected('');setOptions([]);setOptionsLoading(Boolean(id));setNotice('');setError('');
+    const row=categories.find(c=>c._id===id);
+    window.history.replaceState(null,'',`/donate?givingCategory=${encodeURIComponent(row?.slug||'')}`);
   }
-  const options=category==='General'?giving:events;
-  const current=options.find(item=>item.slug===selected)||options.find(item=>item.slug===defaultGiving)||options[0];
-  const opportunity=category==='General'?giving.find(g=>g.slug===current?.slug):undefined;
-  const event=category==='Event'?events.find(e=>e.slug===current?.slug):undefined;
-  function choose(nextCategory:DonationCategory,slug:string){
-    setCategory(nextCategory);setSelected(slug);setNotice('');
-    // Refreshes preserve the new selection and discard the previous amount.
-    window.history.replaceState(null,'',nextCategory==='Event'?eventDonationPath(slug):donatePath(slug));
+  function chooseGiving(slug:string){
+    setSelected(slug);
+    const params=new URLSearchParams({giving:slug,givingCategory:chosen?.slug||'',categoryId:category});
+    window.history.replaceState(null,'',`/donate?${params}`);
   }
-  return <div className="donate-page">
-    <nav className="container giving-detail-breadcrumb" aria-label="Breadcrumb"><PageLink href="/">Home</PageLink><ChevronRight aria-hidden="true"/><PageLink href="/giving">Giving</PageLink><ChevronRight aria-hidden="true"/><span aria-current="page">Donate</span></nav>
-    <div className="container"><header className="checkout-heading"><div><p className="eyebrow">An offering of seva</p><h1>Make a Donation</h1><p>Choose your offering and amount before continuing to checkout.</p></div><span className="checkout-preview"><Info aria-hidden="true"/>Frontend preview · no payment is taken</span></header>
-      {notice&&<p className="account-demo-notice" role="status">{notice}</p>}
-      <div className="donate-selection-grid"><section className="checkout-panel donate-option-panel" aria-labelledby="donate-option-title"><div className="checkout-panel-heading"><HandHeart aria-hidden="true"/><div><p className="eyebrow">Your offering</p><h2 id="donate-option-title">Donation Details</h2></div></div>
-        <div className="auth-field"><label htmlFor="donate-category">Category</label><select id="donate-category" value={category} onChange={e=>{const next=e.target.value as DonationCategory;choose(next,next==='General'?defaultGiving:events[0]?.slug||'');}}><option>General</option><option>Event</option></select></div>
-        <div className="auth-field"><label htmlFor="donate-for">Donation For</label><select id="donate-for" value={current?.slug||''} disabled={!options.length} onChange={e=>choose(category,e.target.value)}>{!options.length&&<option value="">No available {category==='General'?'giving items':'events'}</option>}{options.map(item=><option key={item.slug} value={item.slug}>{item.title}{category==='Event'?` — ${eventDate(data.events.find(e=>e.slug===item.slug)!.date)}`:''}</option>)}</select></div>
-        <p className="donate-description">{opportunity?.shortDescription||event?.description||'Please return when a donation option is available.'}</p>
-        <p className="checkout-demo-note">Your selected {category==='General'?'giving item':'event'} and amount will be carried into the donation summary. Guest and demo account checkout are available.</p>
-      </section>{current&&<DonationPanel opportunity={opportunity} event={event}/>}</div>
-    </div>
+  return <div className="donate-page donate-experience container"><header className="checkout-heading"><div><p className="eyebrow">An offering of seva</p><h1>Make a Donation</h1><p>Choose a category, Giving opportunity and donation amount.</p></div></header>{clientDemoPaymentsDeferred&&<PaymentDemoNotice/>}
+    {notice&&<p role="status">{notice}</p>}{error&&<div role="alert"><p>{error}</p><button className="button" onClick={()=>{setError('');setRetry(n=>n+1)}}>Try Again</button></div>}
+    {loading?<p role="status">Loading Giving categories…</p>:!categories.length?<section className="checkout-empty"><h2>Giving categories are being prepared</h2><p>Please contact the Haveli for seva information.</p></section>:<div className="donate-selection-grid"><section className="checkout-panel"><div className="checkout-panel-heading"><HandHeart aria-hidden="true"/><h2>Donation Details</h2></div>
+
+      <h2>1. Choose Category</h2>
+      <div className="offering-grid" role="group" aria-label="Donation category">{donationGroups.map(([slug,label])=><button type="button" key={slug} aria-pressed={group===slug} onClick={()=>{if(group===slug)return;setGroup(slug);chooseCategory(categories.find(c=>c.slug===slug)?._id||'');}}><HandHeart aria-hidden="true"/><strong>{label}</strong><span>{group===slug?'✓ Selected':'Choose offering'}</span></button>)}</div>
+      {group==='utsav'&&<><h2>Choose your festival</h2><div className="offering-grid festival-grid" role="group" aria-label="Festival">{festivalCategorySlugs.map(slug=>categories.find(c=>c.slug===slug)).filter((c):c is GivingCategoryRecord=>Boolean(c)).map(c=><button type="button" key={c._id} aria-pressed={category===c._id} onClick={()=>{if(category!==c._id)chooseCategory(c._id)}}>{c.image&&<CatalogImage src={c.image} fallback="/images/diya.webp" alt=""/>}<strong>{c.name}</strong><span>{category===c._id?'✓ Selected':'Choose festival'}</span></button>)}</div></>}
+      {chosen&&<><h2>2. Choose Giving</h2><p>{chosen.description}</p><div className="offering-grid giving-grid" role="group" aria-label="Giving opportunity">{options.map(g=><button type="button" key={g._id} aria-pressed={selected===g.slug} onClick={()=>chooseGiving(g.slug)}><strong>{g.title}</strong>{g.description&&<span>{g.description}</span>}<span>{selected===g.slug?'✓ Selected':'Select this Giving'}</span></button>)}</div></>}
+      {optionsLoading?<p role="status">Loading Giving options…</p>:category&&!options.length&&<p>No active Giving options are available in this category.</p>}
+      {opportunity&&<p className="catalog-description">{opportunity.description}</p>}
+    </section><aside className="donate-summary">{opportunity&&chosen?<DonationPanel key={category+opportunity._id} opportunity={givingView(opportunity)} givingCategory={chosen} donatePage/>:<><HandHeart aria-hidden="true"/><h2>3. Choose Donation Amount</h2><p>Choose an offering and Giving option to see the available amounts.</p><h2>4. Review Your Donation</h2><p>Your donation details will appear here before checkout.</p><button type="button" className="button" disabled>Continue to Checkout</button></>}</aside></div>}
   </div>;
 }

@@ -66,7 +66,7 @@ const celebrations = {
 function event(kind: keyof typeof celebrations, date: string, past = false): TempleEvent {
   const id = `${kind}-${date.slice(0,4)}`;
   const slug = `${celebrations[kind].slug}-${date.slice(0,4)}`;
-  return { ...celebrations[kind], id, slug, kind, past, date, venue:'Pushthidham Haveli', location:'Ocala, Florida, USA', detailsPath: `/events/${slug}` };
+  return { ...celebrations[kind], id, slug, kind, past, date, venue:'Pushtidham Haveli', location:'Ocala, Florida, USA', detailsPath: `/events/${slug}` };
 }
 
 // Static client-demo schedules. Replace with temple-approved schedules before launch.

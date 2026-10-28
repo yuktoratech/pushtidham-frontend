@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" role="img" aria-labelledby="title desc">
+  <title id="title">Annakut and Govardhan decorative illustration</title><desc id="desc">Govardhan hill above rows of devotional offerings.</desc>
+  <defs><linearGradient id="bg" y2="1"><stop stop-color="#0b3c2e"/><stop offset="1" stop-color="#176044"/></linearGradient></defs><rect width="800" height="480" fill="url(#bg)"/>
+  <path d="M88 322 235 172l78 72 111-144 96 123 61-57 132 156Z" fill="#d9c178" stroke="#f4e9c7" stroke-width="7"/><path d="m126 319 109-111 79 73 109-139 92 119 66-58 92 116Z" fill="#46754d"/>
+  <g fill="#fff7df" stroke="#a78039" stroke-width="6"><ellipse cx="175" cy="386" rx="76" ry="34"/><ellipse cx="324" cy="386" rx="76" ry="34"/><ellipse cx="476" cy="386" rx="76" ry="34"/><ellipse cx="625" cy="386" rx="76" ry="34"/></g>
+  <g fill="#d59a42"><circle cx="151" cy="368" r="16"/><circle cx="184" cy="359" r="18"/><circle cx="211" cy="372" r="14"/><circle cx="301" cy="368" r="16"/><circle cx="335" cy="358" r="18"/><circle cx="362" cy="372" r="14"/><circle cx="453" cy="368" r="16"/><circle cx="487" cy="358" r="18"/><circle cx="514" cy="372" r="14"/><circle cx="602" cy="368" r="16"/><circle cx="636" cy="358" r="18"/><circle cx="663" cy="372" r="14"/></g>
+</svg>

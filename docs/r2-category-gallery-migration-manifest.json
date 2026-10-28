@@ -1,0 +1,632 @@
+{
+  "version": 2,
+  "status": "local-category-artwork-prepared-migration-blocked",
+  "requiresSeparateApproval": true,
+  "policy": {
+    "copyOnly": true,
+    "overwrite": false,
+    "delete": false,
+    "referenceSwitchAfterVerification": true,
+    "rollback": "restore saved URL/code preimages; retain original objects and local assets",
+    "ownership": "Client approval required before copying any asset whose provenance is not confirmed"
+  },
+  "assets": [
+    {
+      "source": "/apple-touch-icon.png",
+      "bytes": 53709,
+      "sha256": "ff065d5df2f880abf6f40310f9f76ddc12e5a6ae1b52c5270552bd7ca75bd672",
+      "proposedKey": null,
+      "action": "keep-local"
+    },
+    {
+      "source": "/favicon.ico",
+      "bytes": 19250,
+      "sha256": "da7b9bdb271084aa7904b36b0259b1dfb9b5870a52dd372c1f95fee5591f3f04",
+      "proposedKey": null,
+      "action": "keep-local"
+    },
+    {
+      "source": "/favicon.svg",
+      "bytes": 227,
+      "sha256": "df3cb7bb22ba940126e364e124b1512926274ab22537cabc84d5f2d688bdba55",
+      "proposedKey": null,
+      "action": "keep-local"
+    },
+    {
+      "source": "/file.svg",
+      "bytes": 393,
+      "sha256": "81a9ce5ca9bc60870c1d72c0fd5b98b2bc5c8c02b0e04fefeab9efcc11277228",
+      "proposedKey": null,
+      "action": "exclude",
+      "exclusionReason": "Unused template asset; no references in app, components or lib."
+    },
+    {
+      "source": "/globe.svg",
+      "bytes": 1037,
+      "sha256": "13187c071b4d369df3a7a179f69a927165bf624e1a524ee6c93b7d3be75d6fc8",
+      "proposedKey": null,
+      "action": "exclude",
+      "exclusionReason": "Unused template asset; no references in app, components or lib."
+    },
+    {
+      "source": "/window.svg",
+      "bytes": 387,
+      "sha256": "d3cd4bf0c1123258fcc266409856e28c93d4fc1cf8476702225e17842900ca63",
+      "proposedKey": null,
+      "action": "exclude",
+      "exclusionReason": "Unused template asset; no references in app, components or lib."
+    },
+    {
+      "source": "/images/annakut.webp",
+      "bytes": 724040,
+      "sha256": "7c796f607774e163c198694904c521ff109b72326800a0f6682efb3f5936e0c6",
+      "proposedKey": "branding/site-artwork/7c796f607774e163/annakut.webp",
+      "action": "candidate-copy-after-ownership-approval"
+    },
+    {
+      "source": "/images/darshan.webp",
+      "bytes": 30218,
+      "sha256": "5034deab34f2b766e23ec20fbfd168bd3952c8da938041d3af148ba52ed082d6",
+      "proposedKey": "branding/site-artwork/5034deab34f2b766/darshan.webp",
+      "action": "candidate-copy-after-ownership-approval"
+    },
+    {
+      "source": "/images/devotional-hero.webp",
+      "bytes": 406176,
+      "sha256": "a6d93ccbb4110529a4925c76eb177f839a98827b68b26132a03d29a7a2a9254d",
+      "proposedKey": "branding/site-artwork/a6d93ccbb4110529/devotional-hero.webp",
+      "action": "candidate-copy-after-ownership-approval"
+    },
+    {
+      "source": "/images/diya.webp",
+      "bytes": 223874,
+      "sha256": "a0d152303233eae578d87fbaa5f8187bece702698c3b4f78b85c11f026af675c",
+      "proposedKey": "branding/site-artwork/a0d152303233eae5/diya.webp",
+      "action": "candidate-copy-after-ownership-approval"
+    },
+    {
+      "source": "/images/haveli-about.webp",
+      "bytes": 696256,
+      "sha256": "487a7ff248a4d0a417ba74ffac8853b2d453f500d839fe8acbf865f2ef687bae",
+      "proposedKey": "branding/site-artwork/487a7ff248a4d0a4/haveli-about.webp",
+      "action": "candidate-copy-after-ownership-approval"
+    },
+    {
+      "source": "/images/hero.webp",
+      "bytes": 42674,
+      "sha256": "1c8c8fe06d28477e2df86f1a197d98ac0e66e58602d18d591a08cd09770edb88",
+      "proposedKey": "branding/site-artwork/1c8c8fe06d28477e/hero.webp",
+      "action": "candidate-copy-after-ownership-approval"
+    },
+    {
+      "source": "/images/logo.webp",
+      "bytes": 2562,
+      "sha256": "532e779f7af468b5ec7f1ce4b1eee82a9e4e7e13574b87698dcbb350b02cd295",
+      "proposedKey": "branding/site-artwork/532e779f7af468b5/logo.webp",
+      "action": "candidate-copy-after-ownership-approval"
+    },
+    {
+      "source": "/images/pushtidham-official-logo.png",
+      "bytes": 1358996,
+      "sha256": "ea458bf434a83d03ade9b4d79d820e16dae9689f6dc474b991c34650f26ae4e8",
+      "proposedKey": "branding/official-logo/ea458bf434a83d03/pushtidham-official-logo.png",
+      "action": "preserve-approved-original-no-switch"
+    },
+    {
+      "source": "/images/pushtidham-official-logo.webp",
+      "bytes": 145614,
+      "sha256": "ea955dd6287de5224c190d807d4ead84f0e5b48ccbbe9fde103484e00235744a",
+      "proposedKey": "branding/official-logo/ea955dd6287de522/pushtidham-official-logo.webp",
+      "action": "preserve-approved-original-no-switch"
+    },
+    {
+      "source": "/images/temple.webp",
+      "bytes": 14164,
+      "sha256": "571ca3e2bfd2c655df54da240a19d296d7050990ac23621671dee0bb9dac8f5c",
+      "proposedKey": "branding/site-artwork/571ca3e2bfd2c655/temple.webp",
+      "action": "candidate-copy-after-ownership-approval"
+    },
+    {
+      "source": "/images/festivals/annakut.svg",
+      "bytes": 1304,
+      "sha256": "d2b8c54cf377cad40f976ac02437cd99cdbbbbc083e89ea27153c8d36381abbb",
+      "proposedKey": "events/educational-guides/d2b8c54cf377cad4/annakut.svg",
+      "action": "candidate-copy-after-ownership-approval"
+    },
+    {
+      "source": "/images/festivals/hindola.svg",
+      "bytes": 1137,
+      "sha256": "ff10a6f4629c37b9edad8cb5e68bbe7f24364ad5570f3b1313117f2858aaaa30",
+      "proposedKey": "events/educational-guides/ff10a6f4629c37b9/hindola.svg",
+      "action": "candidate-copy-after-ownership-approval"
+    },
+    {
+      "source": "/images/festivals/holi.svg",
+      "bytes": 984,
+      "sha256": "645988dc19c15e7e21ad01c2a7d09717b8f4497b3beceb19159645ac1b00058d",
+      "proposedKey": "events/educational-guides/645988dc19c15e7e/holi.svg",
+      "action": "candidate-copy-after-ownership-approval"
+    },
+    {
+      "source": "/images/festivals/janmashtami.svg",
+      "bytes": 1347,
+      "sha256": "4e79c9985c524c487a2ddac25c564148cdf2b739dec99bb8b64e3fbd52d8b795",
+      "proposedKey": "events/educational-guides/4e79c9985c524c48/janmashtami.svg",
+      "action": "candidate-copy-after-ownership-approval"
+    },
+    {
+      "source": "/images/festivals/mahaprabhuji.svg",
+      "bytes": 1179,
+      "sha256": "450475b5c17cdbda9ada984f5a91e30643646e078d7793b3dca87697ae444a45",
+      "proposedKey": "events/educational-guides/450475b5c17cdbda/mahaprabhuji.svg",
+      "action": "candidate-copy-after-ownership-approval"
+    },
+    {
+      "source": "/images/festivals/nand-mahotsav.svg",
+      "bytes": 1159,
+      "sha256": "12a0971c0bdac8a84868e28c5bb7de9981cb5b9c02e4912941901195c2c80ba3",
+      "proposedKey": "events/educational-guides/12a0971c0bdac8a8/nand-mahotsav.svg",
+      "action": "candidate-copy-after-ownership-approval"
+    },
+    {
+      "source": "/images/festivals/pavitra-ekadashi.svg",
+      "bytes": 1180,
+      "sha256": "673178815250d7ef4fefc58b306fda8f7ea81cbdfbee27b1da9516cb82e9f7b9",
+      "proposedKey": "events/educational-guides/673178815250d7ef/pavitra-ekadashi.svg",
+      "action": "candidate-copy-after-ownership-approval"
+    },
+    {
+      "source": "/images/festivals/vasant-panchami.svg",
+      "bytes": 1374,
+      "sha256": "ca4d08878f51af6a3067ca3aa5831c5243287ac1432b363cd7b62ecaef00e2e9",
+      "proposedKey": "events/educational-guides/ca4d08878f51af6a/vasant-panchami.svg",
+      "action": "candidate-copy-after-ownership-approval"
+    },
+    {
+      "id": "category-daily-seva",
+      "source": "/images/categories/daily-seva.webp",
+      "categoryId": "5cd141e27aa548b08e859ec1",
+      "categorySlug": "daily-seva",
+      "width": 1200,
+      "height": 800,
+      "bytes": 313964,
+      "sha256": "83bb4e6363b246bcecb41944a95ffe7185c68afe4a032c1ebf888f1cf2948b97",
+      "mimeType": "image/webp",
+      "approvalStatus": "client-approved",
+      "ownership": "Pushtidham project artwork, client-approved for website use",
+      "usagePermission": "client-approved-for-website-use",
+      "proposedKey": "categories/daily-seva/daily-seva-83bb4e6363b246bcecb41944a95ffe7185c68afe4a032c1ebf888f1cf2948b97.webp",
+      "action": "prepared-local-awaiting-migration-approval",
+      "assetCategory": "category-artwork",
+      "consumers": [
+        "Giving category cards"
+      ],
+      "currentAtlasImage": "",
+      "expectedAtlasUpdate": "image and description fields only",
+      "rollback": {
+        "retainSource": true,
+        "oldReference": ""
+      },
+      "recordAssignments": [
+        {
+          "collection": "givingcategories",
+          "id": "5cd141e27aa548b08e859ec1",
+          "field": "image"
+        }
+      ],
+      "crop": {
+        "left": 140,
+        "top": 10,
+        "width": 480,
+        "height": 320
+      },
+      "upscaleFactor": 2.5
+    },
+    {
+      "id": "category-general-donation",
+      "source": "/images/categories/general-donation.webp",
+      "categoryId": "34182ed239cb95df622288cc",
+      "categorySlug": "general-donation",
+      "width": 1200,
+      "height": 800,
+      "bytes": 170042,
+      "sha256": "3c9fd460b2508f055724716a02f7917a14338f3b7169fb17ef3cc866c535a760",
+      "mimeType": "image/webp",
+      "approvalStatus": "client-approved",
+      "ownership": "Pushtidham project artwork, client-approved for website use",
+      "usagePermission": "client-approved-for-website-use",
+      "proposedKey": "categories/general-donation/general-donation-3c9fd460b2508f055724716a02f7917a14338f3b7169fb17ef3cc866c535a760.webp",
+      "action": "prepared-local-awaiting-migration-approval",
+      "assetCategory": "category-artwork",
+      "consumers": [
+        "Giving category cards"
+      ],
+      "currentAtlasImage": "",
+      "expectedAtlasUpdate": "image and description fields only",
+      "rollback": {
+        "retainSource": true,
+        "oldReference": ""
+      },
+      "recordAssignments": [
+        {
+          "collection": "givingcategories",
+          "id": "34182ed239cb95df622288cc",
+          "field": "image"
+        }
+      ],
+      "crop": {
+        "left": 1038,
+        "top": 10,
+        "width": 480,
+        "height": 320
+      },
+      "upscaleFactor": 2.5
+    },
+    {
+      "id": "category-dolotsav",
+      "source": "/images/categories/dolotsav.webp",
+      "categoryId": "013ed2dcfa609d03285d1ddd",
+      "categorySlug": "dolotsav",
+      "width": 1200,
+      "height": 800,
+      "bytes": 185608,
+      "sha256": "01c0e5e82f5a2fc6a4dbf42fce865eaaa31aa74ee22ab93bd89d30b11bc1c1b1",
+      "mimeType": "image/webp",
+      "approvalStatus": "client-approved",
+      "ownership": "Pushtidham project artwork, client-approved for website use",
+      "usagePermission": "client-approved-for-website-use",
+      "proposedKey": "categories/dolotsav/dolotsav-01c0e5e82f5a2fc6a4dbf42fce865eaaa31aa74ee22ab93bd89d30b11bc1c1b1.webp",
+      "action": "prepared-local-awaiting-migration-approval",
+      "assetCategory": "category-artwork",
+      "consumers": [
+        "Giving category cards"
+      ],
+      "currentAtlasImage": "",
+      "expectedAtlasUpdate": "image and description fields only",
+      "rollback": {
+        "retainSource": true,
+        "oldReference": ""
+      },
+      "recordAssignments": [
+        {
+          "collection": "givingcategories",
+          "id": "013ed2dcfa609d03285d1ddd",
+          "field": "image"
+        }
+      ],
+      "crop": {
+        "left": 295,
+        "top": 350,
+        "width": 450,
+        "height": 300
+      },
+      "upscaleFactor": 2.6666666666666665
+    },
+    {
+      "id": "category-pragatya-divas-maha-bhog",
+      "source": "/images/categories/pragatya-divas-maha-bhog.webp",
+      "categoryId": "c0e46f2266fce999bc02d5cc",
+      "categorySlug": "pragatya-divas-maha-bhog",
+      "width": 1200,
+      "height": 800,
+      "bytes": 184252,
+      "sha256": "3bc37f31e931a6cb19da995da6f9539197acba51d5e80d365acb778fa82783c1",
+      "mimeType": "image/webp",
+      "approvalStatus": "client-approved",
+      "ownership": "Pushtidham project artwork, client-approved for website use",
+      "usagePermission": "client-approved-for-website-use",
+      "proposedKey": "categories/pragatya-divas-maha-bhog/pragatya-divas-maha-bhog-3bc37f31e931a6cb19da995da6f9539197acba51d5e80d365acb778fa82783c1.webp",
+      "action": "prepared-local-awaiting-migration-approval",
+      "assetCategory": "category-artwork",
+      "consumers": [
+        "Giving category cards"
+      ],
+      "currentAtlasImage": "",
+      "expectedAtlasUpdate": "image and description fields only",
+      "rollback": {
+        "retainSource": true,
+        "oldReference": ""
+      },
+      "recordAssignments": [
+        {
+          "collection": "givingcategories",
+          "id": "c0e46f2266fce999bc02d5cc",
+          "field": "image"
+        }
+      ],
+      "crop": {
+        "left": 930,
+        "top": 350,
+        "width": 450,
+        "height": 300
+      },
+      "upscaleFactor": 2.6666666666666665
+    },
+    {
+      "id": "category-nand-mahotsav",
+      "source": "/images/categories/nand-mahotsav.webp",
+      "categoryId": "dd9b046182853ea6447d1fb2",
+      "categorySlug": "nand-mahotsav",
+      "width": 1200,
+      "height": 800,
+      "bytes": 210760,
+      "sha256": "a2963c3640d0cfc5dad0c8fe993c57d138be71097d39239634071db22c74cc7f",
+      "mimeType": "image/webp",
+      "approvalStatus": "client-approved",
+      "ownership": "Pushtidham project artwork, client-approved for website use",
+      "usagePermission": "client-approved-for-website-use",
+      "proposedKey": "categories/nand-mahotsav/nand-mahotsav-a2963c3640d0cfc5dad0c8fe993c57d138be71097d39239634071db22c74cc7f.webp",
+      "action": "prepared-local-awaiting-migration-approval",
+      "assetCategory": "category-artwork",
+      "consumers": [
+        "Giving category cards"
+      ],
+      "currentAtlasImage": "",
+      "expectedAtlasUpdate": "image and description fields only",
+      "rollback": {
+        "retainSource": true,
+        "oldReference": ""
+      },
+      "recordAssignments": [
+        {
+          "collection": "givingcategories",
+          "id": "dd9b046182853ea6447d1fb2",
+          "field": "image"
+        }
+      ],
+      "crop": {
+        "left": 14,
+        "top": 679,
+        "width": 486,
+        "height": 324
+      },
+      "upscaleFactor": 2.4691358024691357
+    },
+    {
+      "id": "category-adhikmas-hindola",
+      "source": "/images/categories/adhikmas-hindola.webp",
+      "categoryId": "ebc31477cbc3b20077006a71",
+      "categorySlug": "adhikmas-hindola",
+      "width": 1200,
+      "height": 800,
+      "bytes": 267674,
+      "sha256": "882fa11cc8af3fd9e7485181afb7ca38cd58ea3b6638cae94c9a11d9d16e8f3c",
+      "mimeType": "image/webp",
+      "approvalStatus": "client-approved",
+      "ownership": "Pushtidham project artwork, client-approved for website use",
+      "usagePermission": "client-approved-for-website-use",
+      "proposedKey": "categories/adhikmas-hindola/adhikmas-hindola-882fa11cc8af3fd9e7485181afb7ca38cd58ea3b6638cae94c9a11d9d16e8f3c.webp",
+      "action": "prepared-local-awaiting-migration-approval",
+      "assetCategory": "category-artwork",
+      "consumers": [
+        "Giving category cards"
+      ],
+      "currentAtlasImage": "",
+      "expectedAtlasUpdate": "image and description fields only",
+      "rollback": {
+        "retainSource": true,
+        "oldReference": ""
+      },
+      "recordAssignments": [
+        {
+          "collection": "givingcategories",
+          "id": "ebc31477cbc3b20077006a71",
+          "field": "image"
+        }
+      ],
+      "crop": {
+        "left": 528,
+        "top": 679,
+        "width": 480,
+        "height": 320
+      },
+      "upscaleFactor": 2.5
+    },
+    {
+      "id": "category-annakut",
+      "source": "/images/categories/annakut.webp",
+      "categoryId": "3c61fb0cc4df85b97c1eec99",
+      "categorySlug": "annakut",
+      "width": 1200,
+      "height": 800,
+      "bytes": 263334,
+      "sha256": "eac39b3fb68feb3fd086ba0efe0975bc15ca3d12efc5c4227fd944ebca3d5825",
+      "mimeType": "image/webp",
+      "approvalStatus": "client-approved",
+      "ownership": "Pushtidham project artwork, client-approved for website use",
+      "usagePermission": "client-approved-for-website-use",
+      "proposedKey": "categories/annakut/annakut-eac39b3fb68feb3fd086ba0efe0975bc15ca3d12efc5c4227fd944ebca3d5825.webp",
+      "action": "prepared-local-awaiting-migration-approval",
+      "assetCategory": "category-artwork",
+      "consumers": [
+        "Giving category cards"
+      ],
+      "currentAtlasImage": "",
+      "expectedAtlasUpdate": "image and description fields only",
+      "rollback": {
+        "retainSource": true,
+        "oldReference": ""
+      },
+      "recordAssignments": [
+        {
+          "collection": "givingcategories",
+          "id": "3c61fb0cc4df85b97c1eec99",
+          "field": "image"
+        }
+      ],
+      "crop": {
+        "left": 1034,
+        "top": 679,
+        "width": 486,
+        "height": 324
+      },
+      "upscaleFactor": 2.4691358024691357
+    }
+  ],
+  "databaseImages": {
+    "source": "givings.image, events.image, events.gallery[].url, givingcategories.image",
+    "action": "read-only inventory at approved execution preflight; retain every existing URL; do not infer ownership from public accessibility",
+    "categories": "categories/<category-slug>/<category-slug>-<full-sha256>.webp",
+    "giving": "giving/<giving-id>/<uuid>.webp",
+    "events": "events/<event-id>/<uuid>.webp",
+    "existingManagedCompatibility": "Existing flat keys remain valid. Phase 1 supports nested slug/content-hash keys; no existing URL is switched in Phase 2."
+  },
+  "existingSlider": {
+    "prefix": "home-slider/official-5ba55c13ca87a17e/",
+    "action": "preserve-no-copy-no-delete"
+  },
+  "artworkSource": {
+    "filename": "pushtidham-approved-category-collage.png",
+    "sha256": "0d115998d8ea1da179762b044e204df022f555badc57574f7c13ceecfc195b80",
+    "width": 1536,
+    "height": 1024,
+    "processing": "Deterministic crop and Lanczos3 resize; WebP quality 95, effort 6. No generated content.",
+    "limitation": "Native crops are 450?486 pixels wide. Upscaling does not recover detail. Wide panels lose peripheral subjects/offerings; central devotional subjects retained. Client review of final crops recommended."
+  },
+  "categoryArtwork": [
+    {
+      "slug": "daily-seva",
+      "categoryId": "5cd141e27aa548b08e859ec1",
+      "assetId": "category-daily-seva",
+      "approvalStatus": "client-approved",
+      "descriptionApproval": "client-approved",
+      "description": "Support daily seva offerings and devotional services at Pushtidham Haveli."
+    },
+    {
+      "slug": "general-donation",
+      "categoryId": "34182ed239cb95df622288cc",
+      "assetId": "category-general-donation",
+      "approvalStatus": "client-approved",
+      "descriptionApproval": "client-approved",
+      "description": "Contribute toward Mahaprasad and the Haveli's devotional activities."
+    },
+    {
+      "slug": "dolotsav",
+      "categoryId": "013ed2dcfa609d03285d1ddd",
+      "assetId": "category-dolotsav",
+      "approvalStatus": "client-approved",
+      "descriptionApproval": "client-approved",
+      "description": "Participate in Dolotsav celebrations through dedicated seva offerings."
+    },
+    {
+      "slug": "pragatya-divas-maha-bhog",
+      "categoryId": "c0e46f2266fce999bc02d5cc",
+      "assetId": "category-pragatya-divas-maha-bhog",
+      "approvalStatus": "client-approved",
+      "descriptionApproval": "client-approved",
+      "description": "Support Pragatya Divas and Maha Bhog seva offerings."
+    },
+    {
+      "slug": "nand-mahotsav",
+      "categoryId": "dd9b046182853ea6447d1fb2",
+      "assetId": "category-nand-mahotsav",
+      "approvalStatus": "client-approved",
+      "descriptionApproval": "client-approved",
+      "description": "Celebrate Nand Mahotsav through special devotional seva offerings."
+    },
+    {
+      "slug": "adhikmas-hindola",
+      "categoryId": "ebc31477cbc3b20077006a71",
+      "assetId": "category-adhikmas-hindola",
+      "approvalStatus": "client-approved",
+      "descriptionApproval": "client-approved",
+      "description": "Support special Hindola seva offerings during Adhikmas."
+    },
+    {
+      "slug": "annakut",
+      "categoryId": "3c61fb0cc4df85b97c1eec99",
+      "assetId": "category-annakut",
+      "approvalStatus": "client-approved",
+      "descriptionApproval": "client-approved",
+      "description": "Contribute toward Annakut celebrations and devotional food offerings."
+    }
+  ],
+  "atlasImageMappings": [
+    {
+      "collection": "givingcategories",
+      "id": "5cd141e27aa548b08e859ec1",
+      "field": "image",
+      "oldValue": "",
+      "newAssetId": "category-daily-seva",
+      "precondition": "Reverify empty image field at separately approved live preflight"
+    },
+    {
+      "collection": "givingcategories",
+      "id": "34182ed239cb95df622288cc",
+      "field": "image",
+      "oldValue": "",
+      "newAssetId": "category-general-donation",
+      "precondition": "Reverify empty image field at separately approved live preflight"
+    },
+    {
+      "collection": "givingcategories",
+      "id": "013ed2dcfa609d03285d1ddd",
+      "field": "image",
+      "oldValue": "",
+      "newAssetId": "category-dolotsav",
+      "precondition": "Reverify empty image field at separately approved live preflight"
+    },
+    {
+      "collection": "givingcategories",
+      "id": "c0e46f2266fce999bc02d5cc",
+      "field": "image",
+      "oldValue": "",
+      "newAssetId": "category-pragatya-divas-maha-bhog",
+      "precondition": "Reverify empty image field at separately approved live preflight"
+    },
+    {
+      "collection": "givingcategories",
+      "id": "dd9b046182853ea6447d1fb2",
+      "field": "image",
+      "oldValue": "",
+      "newAssetId": "category-nand-mahotsav",
+      "precondition": "Reverify empty image field at separately approved live preflight"
+    },
+    {
+      "collection": "givingcategories",
+      "id": "ebc31477cbc3b20077006a71",
+      "field": "image",
+      "oldValue": "",
+      "newAssetId": "category-adhikmas-hindola",
+      "precondition": "Reverify empty image field at separately approved live preflight"
+    },
+    {
+      "collection": "givingcategories",
+      "id": "3c61fb0cc4df85b97c1eec99",
+      "field": "image",
+      "oldValue": "",
+      "newAssetId": "category-annakut",
+      "precondition": "Reverify empty image field at separately approved live preflight"
+    }
+  ],
+  "excluded": [
+    {
+      "asset": "/file.svg",
+      "reason": "Unused template asset; no references in app, components or lib."
+    },
+    {
+      "asset": "/globe.svg",
+      "reason": "Unused template asset; no references in app, components or lib."
+    },
+    {
+      "asset": "/window.svg",
+      "reason": "Unused template asset; no references in app, components or lib."
+    }
+  ],
+  "protectedObjects": [
+    "home-slider/official-5ba55c13ca87a17e/",
+    "branding/official-logo/"
+  ],
+  "rollback": {
+    "retainOriginalObjects": true,
+    "retainLocalSources": true,
+    "categoryImagePreimages": "Empty; reverify before any approved migration"
+  },
+  "remainingBlockers": [
+    "Category descriptions need client approval",
+    "Event cover and gallery approvals remain outstanding",
+    "Fresh read-only Atlas preimages and R2 collision inventory required before writes",
+    "Separate rollout, backup, verification and rollback approval required",
+    "Other legacy asset candidates remain unapproved; not part of Phase 2"
+  ]
+}

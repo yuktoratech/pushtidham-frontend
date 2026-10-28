@@ -1,0 +1,20 @@
+.offline-entry { padding: 24px; margin-bottom: 24px; }
+.offline-entry .adm-section-heading { padding: 0 0 20px; flex-wrap: wrap; gap: 12px; }
+.offline-entry p { line-height: 1.6; }
+.offline-section { border: 1px solid #ded7c9; border-radius: 12px; padding: 20px; margin: 0 0 20px; min-width: 0; }
+.offline-section legend { font-weight: 700; font-size: 18px; padding: 0 8px; color: #14543d; }
+.offline-entry input:not([type=checkbox]), .offline-entry select, .offline-entry button { min-height: 44px; }
+.offline-entry input, .offline-entry select, .offline-entry textarea { font-size: 16px; max-width: 100%; }
+.offline-entry input[readonly] { background: #f5f4ef; }
+.offline-history { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; line-height: 1.5; }
+.offline-history input { width: 20px; height: 20px; flex-shrink: 0; }
+.offline-amount { margin-top: 18px; max-width: 620px; }
+.offline-presets { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.offline-presets button[aria-pressed=true] { outline: 2px solid #14543d; }
+.offline-success { padding: 16px; background: #edf5ef; border: 1px solid #9fbea9; border-radius: 10px; margin-bottom: 20px; overflow-wrap: anywhere; }
+.offline-success button { margin-right: 16px; }
+.offline-donor-results { list-style: none; padding: 0; margin: 10px 0; border: 1px solid #ded7c9; border-radius: 8px; }
+.offline-donor-results button { display: flex; flex-wrap: wrap; gap: 8px 20px; width: 100%; text-align: left; padding: 12px; background: transparent; border: 0; cursor: pointer; overflow-wrap: anywhere; }
+.offline-donor-results button:hover { background: #f5f4ef; }
+.offline-entry :is(input, select, textarea, button):focus-visible { outline: 3px solid #ad842e; outline-offset: 3px; }
+@media(max-width: 640px) { .offline-entry { padding: 16px; } .offline-section { padding: 14px; } .offline-entry .adm-editor-grid { grid-template-columns: minmax(0, 1fr); } .offline-entry .adm-modal-actions .adm-button { width: 100%; } }

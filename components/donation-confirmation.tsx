@@ -1,16 +1,59 @@
-'use client';
-import { useAdminDemo } from '../hooks/use-admin-demo';
-import { PageLink } from './page-link';
+﻿'use client';
+import {clientDemoPaymentsDeferred,PaymentDemoPage} from './payment-demo-notice';
+import {useCallback,useEffect,useState} from 'react';
+import {Check,Clock3,Info,XCircle} from 'lucide-react';
+import {PageLink} from './page-link';
+import {paymentApi,type PaymentAttemptStatus} from '../lib/api-client';
+import {readPendingPayment,type PendingPayment} from '../lib/checkout';
+import {donationCurrency} from '../lib/donation-selection';
+import {useAuth} from './auth-provider';
 
-import { useState } from 'react';
-import { Check, Clock3, ChevronRight, HandHeart, Info } from 'lucide-react';
-import { checkoutPath, donationCurrency, donationQuery, type DonationSelection } from '../lib/donation-selection';
-import { bankTransferPreview, checkoutDraftKey, donationContext, readDonationSelection } from '../lib/checkout';
-export function DonationConfirmation({pending=false}:{pending?:boolean}){
- const {data,ready:hydrated}=useAdminDemo();const [initializedPending,setInitializedPending]=useState<boolean|null>(null);const [selection,setSelection]=useState<DonationSelection|null>(null);const [ready,setReady]=useState(false);const [transaction,setTransaction]=useState('');
- if(hydrated&&initializedPending!==pending){setInitializedPending(pending);const selected=readDonationSelection(new URLSearchParams(window.location.search),data);setSelection(selected);if(selected&&pending)try{const stored=JSON.parse(sessionStorage.getItem(checkoutDraftKey)||'null');if(stored?.selection?.givingSlug===selected.givingSlug&&stored.selection.amountCents===selected.amountCents&&stored.selection.eventSlug===selected.eventSlug&&stored.draft?.method==='bank-transfer'&&typeof stored.draft.transactionReference==='string')setTransaction(stored.draft.transactionReference.trim());}catch{}setReady(true);}
- if(!ready)return <div className="container checkout-empty" role="status"><HandHeart aria-hidden="true"/><h1>Your Donation Summary</h1><p>Preparing your donation preview…</p></div>;
- if(!selection||!readDonationSelection(new URLSearchParams(donationQuery(selection)),data))return <div className="container checkout-empty"><HandHeart aria-hidden="true"/><p className="eyebrow">An offering of seva</p><h1>Choose Your Donation</h1><p>Select a giving opportunity and amount to view your donation summary.</p><PageLink className="button" href="/donate">Choose a Donation</PageLink></div>;
- const opportunity=donationContext(selection,data);const event=opportunity.event;
- return <div className="donation-confirmation-page"><nav className="container giving-detail-breadcrumb" aria-label="Breadcrumb"><PageLink href="/">Home</PageLink><ChevronRight aria-hidden="true"/><PageLink href="/giving">Giving</PageLink><ChevronRight aria-hidden="true"/><span aria-current="page">{pending?'Pending Donation':'Thank You'}</span></nav><section className="donation-confirmation-card" aria-labelledby="confirmation-title"><div className={`donation-confirmation-icon ${pending?'is-pending':''}`}>{pending?<Clock3 aria-hidden="true"/>:<Check aria-hidden="true"/>}</div><p className="eyebrow">{pending?'Awaiting temple verification':'An offering from the heart'}</p><span className={`donation-confirmation-status ${pending?'is-pending':''}`}>{pending?'Pending':'Successful Donation'} · Demo Preview</span><h1 id="confirmation-title">{pending?'Bank Transfer Pending':'Thank You'}</h1><p className="donation-confirmation-intro">{pending?'Your offering is pending. A bank transfer must be checked by a temple administrator before it can be marked completed.':'Thank you for your generosity and for supporting the seva and community of Pushthidham Haveli.'}</p><div className="donation-confirmation-amount"><small>Donation amount · USD</small><strong>{donationCurrency(selection.amountCents)}</strong></div><dl className="checkout-review-list"><div><dt>{opportunity.category==='Event'?'Event':'Giving opportunity'}</dt><dd>{opportunity.title}</dd></div><div><dt>Category</dt><dd>{opportunity.category}</dd></div>{event&&<div><dt>Event identifier</dt><dd>{event.id}</dd></div>}<div><dt>Donation reference</dt><dd>{pending?bankTransferPreview.demoReference:'PHD-DEMO-002'} <small>(sample reference)</small></dd></div><div><dt>Payment method</dt><dd>{pending?'Bank Transfer':'PayPal'} · Demo</dd></div><div><dt>Donation type</dt><dd>One-Time</dd></div>{pending&&<div><dt>Transaction reference</dt><dd>{transaction||'No transaction reference provided'}</dd></div>}</dl>{pending&&<section className="donation-pending-instructions" aria-labelledby="instructions-title"><h2 id="instructions-title">Bank Transfer Instructions</h2><ol><li>Obtain the confirmed bank details from the temple before making a transfer.</li><li>Keep your bank confirmation number with your donation reference.</li><li>Allow the temple administrator to verify the transfer. Your donation remains Pending until verification is complete.</li></ol><p>Temple bank details are awaiting confirmation. Do not make a transfer using this demo.</p></section>}<p className="donation-confirmation-note"><Info aria-hidden="true"/><span>{pending?'This is a pending-state demonstration. No transfer has been verified or donation record saved.':'This is a successful-donation preview only. No payment has been processed or donation record saved.'}</span></p><div className="donation-confirmation-actions"><PageLink className="button" href="/account/donations">View Donation History</PageLink><PageLink className="button donation-return-home" href="/">Return Home</PageLink></div>{pending&&<PageLink className="donation-confirmation-edit" href={checkoutPath(selection)}>Back to Checkout</PageLink>}</section></div>;
+function IntegratedDonationConfirmation(){
+ const auth=useAuth();
+ const [context,setContext]=useState<PendingPayment|null>(null);
+ const [status,setStatus]=useState<PaymentAttemptStatus|null>(null);
+ const [amount,setAmount]=useState<number|null>(null);
+ const [error,setError]=useState('');
+ const [checking,setChecking]=useState(true);
+ const refresh=useCallback(async(value:PendingPayment)=>{
+  setChecking(true);setError('');
+  try{
+   const result=await paymentApi.status(value.attemptId,value.statusToken);
+   setStatus(result.status);setAmount(result.totalChargeCents);
+  }catch(e){setError(e instanceof Error?e.message:'Unable to check payment status.')}
+  finally{setChecking(false)}
+ },[]);
+ useEffect(()=>{
+  if(auth.status==='initializing')return;
+  const value=readPendingPayment();
+  let active=true;
+  queueMicrotask(()=>{
+   if(!active)return;
+   if(!value||value.provider!=='stripe'){
+    setError('This browser no longer has access to the pending card payment status.');
+    setChecking(false);return;
+   }
+   setContext(value);void refresh(value);
+  });
+  return()=>{active=false};
+ },[refresh,auth.status]);
+ useEffect(()=>{
+  if(!context||!['created','requires_action','verification_pending','processing'].includes(status||''))return;
+  let count=0;
+  const timer=setInterval(()=>{if(++count>=8){clearInterval(timer);return}void refresh(context)},5000);
+  return()=>clearInterval(timer);
+ },[context,status,refresh]);
+ const completed=status==='succeeded',failed=status==='failed'||status==='canceled',waiting=!completed&&!failed;
+ return <div className="donation-confirmation-page"><section className="donation-confirmation-card" aria-live="polite">
+  <div className={`donation-confirmation-icon ${waiting?'is-pending':''}`}>{completed?<Check/>:failed?<XCircle/>:<Clock3/>}</div>
+  <p className="eyebrow">Backend-verified card payment status</p>
+  <span className={`donation-confirmation-status ${waiting?'is-pending':''}`}>{checking?'Checking…':status||'Unavailable'}</span>
+  <h1>{completed?'Thank You':failed?'Payment Not Completed':error&&!status?'Payment Status Unavailable':'Payment Pending'}</h1>
+  <p className="donation-confirmation-intro">{completed?'Your card payment was confirmed by Stripe.':failed?'Your card payment was not completed. You may return to checkout and try again.':error&&!status?'We could not retrieve your payment status. This does not mean your payment failed. Please do not pay again.':'Your card payment is being verified. Please check again shortly.'}</p>
+  {context?.donationPurpose&&<p className="donation-purpose-text"><strong>Donation purpose:</strong> {context.donationPurpose}</p>}
+  {amount!==null&&<div className="donation-confirmation-amount"><small>Total charged · USD</small><strong>{donationCurrency(amount)}</strong></div>}
+  {error&&<p className="donation-confirmation-note" role="alert"><Info/><span>{error}</span></p>}
+  <div className="donation-confirmation-actions">{context&&<button className="button" disabled={checking} onClick={()=>void refresh(context)}>Refresh Status</button>}<PageLink className="button donation-return-home" href="/">Return Home</PageLink></div>
+ </section></div>;
 }
+export function DonationConfirmation(){return clientDemoPaymentsDeferred?<PaymentDemoPage/>:<IntegratedDonationConfirmation/>;}

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" role="img" aria-labelledby="title desc">
+  <title id="title">Vasant Panchami decorative illustration</title><desc id="desc">Yellow spring blossoms surround a ceremonial vessel.</desc>
+  <defs><linearGradient id="bg" y2="1"><stop stop-color="#fff5c9"/><stop offset="1" stop-color="#e9c960"/></linearGradient></defs><rect width="800" height="480" fill="url(#bg)"/>
+  <g fill="#f3b51b" stroke="#a78039" stroke-width="3"><g transform="translate(126 115)"><circle r="24"/><circle cx="35" r="24"/><circle cx="18" cy="31" r="24"/></g><g transform="translate(648 105)"><circle r="24"/><circle cx="35" r="24"/><circle cx="18" cy="31" r="24"/></g><g transform="translate(100 342)"><circle r="24"/><circle cx="35" r="24"/><circle cx="18" cy="31" r="24"/></g><g transform="translate(672 348)"><circle r="24"/><circle cx="35" r="24"/><circle cx="18" cy="31" r="24"/></g></g>
+  <g fill="#145439"><path d="M148 148q112 59 178 146-118-51-178-146"/><path d="M662 138q-111 60-177 147 117-52 177-147"/></g>
+  <path d="M312 198h176l-20 44q35 40 35 100 0 78-103 78t-103-78q0-60 35-100Z" fill="#fff8dc" stroke="#145439" stroke-width="11"/><path d="M310 197q90-74 180 0" fill="none" stroke="#a78039" stroke-width="11"/><path d="M351 322q49 53 98 0" fill="none" stroke="#d7b45f" stroke-width="13" stroke-linecap="round"/>
+</svg>

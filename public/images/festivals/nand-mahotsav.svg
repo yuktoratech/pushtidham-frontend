@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" role="img" aria-labelledby="title desc">
+  <title id="title">Nand Mahotsav decorative illustration</title><desc id="desc">A festive cradle beneath a flowered arch.</desc>
+  <defs><linearGradient id="bg" y2="1"><stop stop-color="#f6e6bd"/><stop offset="1" stop-color="#e5c77f"/></linearGradient></defs><rect width="800" height="480" fill="url(#bg)"/>
+  <path d="M127 424V165C127 70 673 70 673 165v259" fill="none" stroke="#145439" stroke-width="24"/><path d="M160 185C270 92 530 92 640 185" fill="none" stroke="#a78039" stroke-width="8" stroke-dasharray="2 24" stroke-linecap="round"/>
+  <g stroke="#145439" stroke-width="9" fill="none"><path d="M296 136v144m208-144v144"/><path d="M250 279h300l-34 112H284Z" fill="#fdf7e7"/><path d="M276 316h248"/></g>
+  <g fill="#a78039"><circle cx="205" cy="143" r="19"/><circle cx="261" cy="114" r="17"/><circle cx="326" cy="96" r="18"/><circle cx="400" cy="90" r="20"/><circle cx="474" cy="96" r="18"/><circle cx="539" cy="114" r="17"/><circle cx="595" cy="143" r="19"/></g><path d="M354 350q46-58 92 0-46 42-92 0" fill="#d7b45f" opacity=".7"/>
+</svg>

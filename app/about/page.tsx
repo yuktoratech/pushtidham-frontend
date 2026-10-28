@@ -3,8 +3,8 @@ import { Header, Footer, MobileBottomNav } from '../../components/layout';
 import { AboutHero, Breadcrumb, AboutContent } from '../../components/about';
 
 export const metadata: Metadata = {
-  title: 'About Us | Pushthidham Haveli',
-  description: 'Discover the faith, traditions, mission and welcoming community of Hindu Pushthidham Temple.'
+  title: 'About Us | Pushtidham Haveli',
+  description: 'Discover the Pushtimarg faith, mission and welcoming community of Pushtidham Haveli.'
 };
 
 export default function AboutPage() {

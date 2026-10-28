@@ -1,47 +1,66 @@
-import { givingOpportunities, type GivingOpportunity } from './giving';
-import { allEvents, type TempleEvent } from './events';
-import { donationQuery, amountMatchesOpportunity, type DonationSelection } from './donation-selection';
+import type { GivingOpportunity, TempleEvent } from './catalog-ui';
+import { donationQuery, amountMatchesOpportunity, donationSelectionKey, type DonationSelection } from './donation-selection';
 import type { DemoDonor } from './account-demo';
+import {festivalName} from './seva';
 
-export type PaymentMethod = 'paypal' | 'bank-transfer';
-export type CheckoutDraft = {donor:DemoDonor;method:PaymentMethod;transactionReference:string;donorMode:'guest'|'demo'};
+export type CheckoutDraft = {donor:DemoDonor;donorMode:'guest'|'demo';coverFees:boolean};
 export const checkoutDraftKey='pushthidham-checkout-draft';
+export const pendingPaymentKey='pushthidham-pending-payment';
+export type PendingPayment={attemptId:string;statusToken?:string;provider:'stripe';createdAt:number;donationPurpose?:string};
+export function savePendingPayment(value:PendingPayment){sessionStorage.setItem(pendingPaymentKey,JSON.stringify(value));}
+export function readPendingPayment(){try{return JSON.parse(sessionStorage.getItem(pendingPaymentKey)||'null') as PendingPayment|null}catch{return null}}
+export function newIdempotencyKey(){return `checkout-${crypto.randomUUID()}`;}
 export const emptyDonor:DemoDonor={firstName:'',lastName:'',email:'',phone:''};
-export const bankTransferPreview={bankName:'To be provided by temple',accountName:'To be provided by temple',accountNumber:'To be provided',routingNumber:'To be provided',demoReference:'PHD-DEMO-001'};
 export type DonationCatalog={giving:(GivingOpportunity & {active?:boolean})[];events:TempleEvent[]};
-const defaultCatalog:DonationCatalog={giving:givingOpportunities,events:allEvents};
-export function readDonationSelection(query:URLSearchParams,catalog:DonationCatalog=defaultCatalog):DonationSelection|null{
+export function readDonationSelection(query:URLSearchParams,catalog:DonationCatalog):DonationSelection|null{
   const amount=Number(query.get('amount'));
   if(!Number.isSafeInteger(amount)||amount<=0||query.get('type')!=='one-time')return null;
   const rawChoice=query.get('choice');
   const amountChoice=rawChoice==='custom'?'custom':Number(rawChoice);
+  if(query.has('event'))return null;
+  const contextGiving=catalog.giving.find(item=>item.slug===query.get('giving'));
+  if(query.has('categoryId')&&contextGiving?.categoryId!==query.get('categoryId'))return null;
+  const categoryContext={givingCategoryId:contextGiving?.categoryId,givingCategorySlug:query.get('givingCategory')||undefined,givingId:contextGiving?._id,givingTitle:contextGiving?.title};
   const eventCategory=query.get('category')==='event'||(query.get('category')!=='general'&&query.has('event'));
   if(eventCategory){
-    const event=catalog.events.find(e=>e.slug===query.get('event')&&!e.past);
+    if (query.has('giving')) {
+      if (query.has('event')) return null;
+      const giving = catalog.giving.find(g => g.slug === query.get('giving') && g.status === 'active' && g.category === 'utsav');
+      if (!giving || !amountMatchesOpportunity(giving, amountChoice, amount)) return null;
+      return {...categoryContext,categorySlug:'event', givingSlug:giving.slug, amountCents:amount, currency:'USD', donationType:'one-time', amountChoice};
+    }
+    const event=catalog.events.find(e=>e.slug===query.get('event'));
     if(!event||amountChoice!=='custom')return null;
     return {categorySlug:'event',eventSlug:event.slug,eventId:event.id,amountCents:amount,currency:'USD',donationType:'one-time',amountChoice};
   }
   if(query.has('event'))return null;
-  const opportunity=catalog.giving.find(item=>item.slug===query.get('giving')&&item.active!==false);
-  if(!opportunity||!amountMatchesOpportunity(opportunity,amountChoice,amount))return null;
-  return {categorySlug:'general',givingSlug:opportunity.slug,amountCents:amount,currency:'USD',donationType:'one-time',amountChoice};
+  const opportunity=catalog.giving.find(item=>item.slug===query.get('giving')&&item.status==='active');
+  if(!opportunity||opportunity.category==='utsav'||!amountMatchesOpportunity(opportunity,amountChoice,amount))return null;
+  let donationPurpose: string | undefined;
+  if(opportunity.slug==='other'&&typeof sessionStorage!=='undefined'){
+    try{
+      const saved=JSON.parse(sessionStorage.getItem(donationSelectionKey)||'null') as DonationSelection|null;
+      if(saved?.givingSlug==='other'&&saved.amountCents===amount&&saved.amountChoice===amountChoice&&saved.givingId===opportunity._id)
+        donationPurpose=saved.donationPurpose;
+    }catch{}
+  }
+  return {...categoryContext,categorySlug:'general',givingSlug:opportunity.slug,amountCents:amount,currency:'USD',donationType:'one-time',amountChoice,donationPurpose};
 }
 export function donationContext(selection:DonationSelection,catalog:DonationCatalog){
-  if(selection.categorySlug==='event'){
+  if(selection.categorySlug==='event' && selection.eventSlug){
     const event=catalog.events.find(e=>e.slug===selection.eventSlug)!;
     return {...event,category:'Event' as const,event};
   }
   const giving=catalog.giving.find(g=>g.slug===selection.givingSlug)!;
-  return {...giving,category:'General' as const,event:undefined};
+  return {...giving,id:giving._id,title:giving.category==='utsav'?`${festivalName(giving.festivalGroup)} — ${giving.title}`:giving.title,category:selection.categorySlug==='event'?'Event' as const:'General' as const,event:undefined};
 }
 
 export function editDonationPath(selection:DonationSelection){return `/donate?${donationQuery(selection)}`;}
-export function validateCheckout(donor:DemoDonor,method:PaymentMethod,reference:string){
-  const errors:Partial<Record<keyof DemoDonor|'transactionReference',string>>={};
+export function validateCheckout(donor:DemoDonor){
+  const errors:Partial<Record<keyof DemoDonor,string>>={};
   if(!donor.firstName.trim())errors.firstName='Please enter your first name.';
   if(!donor.lastName.trim())errors.lastName='Please enter your last name.';
   if(!donor.email.trim())errors.email='Please enter your email address.';
   else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(donor.email.trim()))errors.email='Please enter a valid email address.';
-  if(method==='bank-transfer'&&!reference.trim())errors.transactionReference='Please enter a transaction reference or confirmation number.';
   return errors;
 }

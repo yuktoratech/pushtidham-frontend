@@ -2,45 +2,52 @@
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { HandHeart, CalendarDays, Landmark, FileText } from 'lucide-react';
-import { useAdminDemo } from '../hooks/use-admin-demo';
 import { readDonationSelection } from '../lib/checkout';
-import type { GivingOpportunity } from '../lib/giving';
-import type { TempleEvent } from '../lib/events';
+import type { GivingOpportunity, TempleEvent } from '../lib/catalog-ui';
 import { allowsCustom, allowsFixed, amountMatchesOpportunity, checkoutPath, donationCurrency, donationSelectionKey, parseCustomAmount, type DonationSelection } from '../lib/donation-selection';
+import { usePublicCatalog } from './catalog-provider';
+import { eventView, givingView } from '../lib/catalog-ui';
+import { centsToUsdInput } from '../lib/money';
 
-type PanelProps={opportunity?:GivingOpportunity;event?:TempleEvent};
-export function DonationPanel({opportunity,event}:PanelProps){
-  const {data,ready}=useAdminDemo();
+import type {GivingCategoryRecord} from '../lib/catalog-api';
+type PanelProps={opportunity?:GivingOpportunity;event?:TempleEvent;givingCategory?:GivingCategoryRecord;donatePage?:boolean};
+export function DonationPanel({opportunity,event,givingCategory,donatePage}:PanelProps){
+  const {giving,events,loading}=usePublicCatalog();
+  const data={giving:giving.map(givingView),events:events.map(eventView)};
+  const ready=!loading;
   const initial=ready?readDonationSelection(new URLSearchParams(window.location.search),data):null;
-  const key=`${ready}:${event?'event':'general'}:${event?.slug||opportunity?.slug}:${opportunity?.amountType}:${opportunity?.suggestedAmounts.join(',')}`;
-  const matches=event?initial?.categorySlug==='event'&&initial.eventSlug===event.slug:initial?.categorySlug==='general'&&initial.givingSlug===opportunity?.slug;
-  return <DonationAmountForm key={key} opportunity={opportunity} event={event} initial={matches?initial:null}/>;
+  const key=`${ready}:${event?'event':'general'}:${event?.slug||opportunity?.slug}:${opportunity?.amountTypeUi}:${opportunity?.suggestedAmounts.join(',')}`;
+  const matches=event?initial?.categorySlug==='event'&&initial.eventSlug===event.slug:initial?.categorySlug===(opportunity?.category==='utsav'?'event':'general')&&initial.givingSlug===opportunity?.slug;
+  return <DonationAmountForm key={key} opportunity={opportunity} event={event} givingCategory={givingCategory} donatePage={donatePage} initial={matches?initial:null}/>;
 }
 
-function DonationAmountForm({opportunity,event,initial}:PanelProps & {initial:DonationSelection|null}){
-  const config=opportunity||{amountType:'custom' as const,suggestedAmounts:[]};
-  const fixed=allowsFixed(config.amountType);
-  const customAllowed=allowsCustom(config.amountType);
+function DonationAmountForm({opportunity,event,givingCategory,donatePage,initial}:PanelProps & {initial:DonationSelection|null}){
+  const other=opportunity?.slug==='other';
+  const config=other?{amountTypeUi:'custom' as const,suggestedAmounts:[]}:opportunity||{amountTypeUi:'custom' as const,suggestedAmounts:[]};
+  const fixed=allowsFixed(config.amountTypeUi);
+  const customAllowed=allowsCustom(config.amountTypeUi);
   const [choice,setChoice]=useState<number|'custom'>(initial?.amountChoice??(fixed?config.suggestedAmounts[0]:'custom'));
-  const [custom,setCustom]=useState(initial?.amountChoice==='custom'?(initial.amountCents/100).toFixed(2):'');
+  const [custom,setCustom]=useState(initial?.amountChoice==='custom'?centsToUsdInput(initial.amountCents):'');
+  const [purpose,setPurpose]=useState(initial?.donationPurpose??'');
   const [touched,setTouched]=useState(false);
   const customRef=useRef<HTMLInputElement>(null);
   const parsed=choice==='custom'?parseCustomAmount(custom):parseCustomAmount(String(choice));
-  const valid=parsed.cents!==null&&amountMatchesOpportunity(config,choice,parsed.cents);
+  const valid=parsed.cents!==null&&amountMatchesOpportunity(config,choice,parsed.cents)&&(!other||Boolean(purpose.trim()));
   const showError=choice==='custom'&&(touched||custom.length>0)&&parsed.error;
   useEffect(()=>{if(choice==='custom')customRef.current?.focus();},[choice]);
   function continueDonation(e:FormEvent<HTMLFormElement>){
     e.preventDefault();setTouched(true);if(!valid||parsed.cents===null)return;
     if(!opportunity&&!event)return;
-    const selection:DonationSelection={amountCents:parsed.cents,currency:'USD',donationType:'one-time',amountChoice:choice,...(event?{categorySlug:'event' as const,eventSlug:event.slug,eventId:event.id}:{categorySlug:'general' as const,givingSlug:opportunity!.slug})};
+    const selection:DonationSelection={amountCents:parsed.cents,currency:'USD',donationType:'one-time',amountChoice:choice,...(other?{donationPurpose:purpose.trim()}:{}),...(givingCategory?{givingCategoryId:givingCategory._id,givingCategorySlug:givingCategory.slug,givingId:opportunity?._id,givingTitle:opportunity?.title}:{}),...(event?{categorySlug:'event' as const,eventSlug:event.slug,eventId:event.id}:{categorySlug:opportunity!.category==='utsav'?'event' as const:'general' as const,givingSlug:opportunity!.slug})};
     try{sessionStorage.setItem(donationSelectionKey,JSON.stringify(selection));}catch{}
+    if(window.location.pathname==='/donate')window.history.replaceState(null,'',checkoutPath(selection).replace('/checkout','/donate'));
     // Match PageLink's document navigation so checkout reads the destination
     // URL after it is committed, rather than the previous selection-page URL.
     window.location.assign(checkoutPath(selection));
   }
   return <aside className="donation-panel" aria-labelledby="amount-title">
     <div className="donation-panel-intro"><HandHeart aria-hidden="true"/><p className="eyebrow">An offering from the heart</p></div>
-    <h2 id="amount-title">Choose Your Donation Amount</h2><p className="donation-panel-subtitle">Every contribution is a meaningful act of seva.</p>
+    <h2 id="amount-title">{donatePage?'3. Choose Donation Amount':'Choose Your Donation Amount'}</h2><p className="donation-panel-subtitle">Every contribution is a meaningful act of seva.</p>
     {event&&<div className="donation-event-message"><CalendarDays aria-hidden="true"/><p>Supporting: <strong>{event.title}</strong></p></div>}
     <form onSubmit={continueDonation} noValidate>
       {fixed&&<fieldset className="donation-amount-options"><legend className="sr-only">Donation amount in USD</legend>
@@ -48,10 +55,13 @@ function DonationAmountForm({opportunity,event,initial}:PanelProps & {initial:Do
         {customAllowed&&<label className={`donation-amount-option donation-custom-option ${choice==='custom'?'is-selected':''}`}><input type="radio" name="donation-amount" value="custom" checked={choice==='custom'} onChange={()=>{setChoice('custom');setTouched(false);}}/><span>Custom Amount</span></label>}
       </fieldset>}
       {customAllowed&&choice==='custom'&&<div className="donation-custom-field"><label htmlFor="custom-donation">Custom amount (USD)</label><div className={`donation-currency-input ${showError?'has-error':''}`}><span aria-hidden="true">$</span><input ref={customRef} id="custom-donation" type="text" inputMode="decimal" autoComplete="off" placeholder="Enter amount" value={custom} onChange={e=>setCustom(e.target.value)} onBlur={()=>setTouched(true)} aria-invalid={!!showError} aria-describedby={showError?'donation-amount-error':'donation-amount-help'}/></div>{showError?<p id="donation-amount-error" className="donation-input-error" role="alert">{parsed.error}</p>:<p id="donation-amount-help" className="donation-input-help">Enter a positive amount in USD, with up to two decimal places.</p>}</div>}
+      {other&&<div className="donation-custom-field"><label htmlFor="donation-purpose">Donation Purpose <span aria-hidden="true">*</span></label><textarea id="donation-purpose" required rows={4} maxLength={500} value={purpose} onChange={e=>setPurpose(e.target.value)} onBlur={()=>setTouched(true)} aria-invalid={touched&&!purpose.trim()} aria-describedby={touched&&!purpose.trim()?'donation-purpose-error':'donation-purpose-help'}/>{touched&&!purpose.trim()?<p id="donation-purpose-error" className="donation-input-error" role="alert">Enter the purpose for this donation.</p>:<p id="donation-purpose-help" className="donation-input-help">Describe how you would like this donation used (up to 500 characters).</p>}</div>}
       <div className="donation-type-line"><span className="donation-type-mark" aria-hidden="true"/><span>One-time donation</span></div>
+      {donatePage&&<h2 className="donate-review-heading">4. Review Your Donation</h2>}
+      {donatePage&&<div className="donate-review-context"><p><span>Category</span><strong>{opportunity?.category==='utsav'?'Utsav':givingCategory?.name}</strong></p>{opportunity?.category==='utsav'&&<p><span>Festival</span><strong>{givingCategory?.name}</strong></p>}<p><span>Giving</span><strong>{opportunity?.title}</strong></p>{other&&purpose.trim()&&<p><span>Purpose</span><strong>{purpose.trim()}</strong></p>}</div>}
       <div className="donation-total"><span>Your contribution</span><strong>{valid?donationCurrency(parsed.cents!):'Choose an amount'}<small>USD</small></strong></div>
       <button type="submit" className="button donation-continue" disabled={!valid}>Continue to Checkout</button><p className="donation-payment-note">No payment is taken when choosing an amount.</p>
     </form>
-    <div className="donation-trust"><div><Landmark aria-hidden="true"/><p>Your contribution supports Pushthidham Haveli.</p></div><div><FileText aria-hidden="true"/><p>A receipt is provided after a successful donation.</p></div></div>
+    <div className="donation-trust"><div><Landmark aria-hidden="true"/><p>Your contribution supports Pushtidham Haveli.</p></div><div><FileText aria-hidden="true"/><p>No receipt is issued for a donation preview.</p></div></div>
   </aside>;
 }
