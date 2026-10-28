@@ -2,6 +2,7 @@
 import './catalog-enhancements.css';
 import './donate-experience.css';
 import {useEffect, useState} from 'react';
+import {donationGroups,festivalCategorySlugs} from '../lib/donation-groups';
 import {HandHeart} from 'lucide-react';
 import {catalogApi, type GivingCategoryRecord, type GivingRecord} from '../lib/catalog-api';
 import {givingView, catalogErrorMessage} from '../lib/catalog-ui';
@@ -66,8 +67,8 @@ export function Donate() {
     {loading?<p role="status">Loading Giving categories…</p>:!categories.length?<section className="checkout-empty"><h2>Giving categories are being prepared</h2><p>Please contact the Haveli for seva information.</p></section>:<div className="donate-selection-grid"><section className="checkout-panel"><div className="checkout-panel-heading"><HandHeart aria-hidden="true"/><h2>Donation Details</h2></div>
 
       <h2>1. Choose Category</h2>
-      <div className="offering-grid" role="group" aria-label="Donation category">{[['daily-seva','Daily Seva'],['general-donation','General Donation'],['utsav','Utsav']].map(([slug,label])=><button type="button" key={slug} aria-pressed={group===slug} onClick={()=>{if(group===slug)return;setGroup(slug);chooseCategory(categories.find(c=>c.slug===slug)?._id||'');}}><HandHeart aria-hidden="true"/><strong>{label}</strong><span>{group===slug?'✓ Selected':'Choose offering'}</span></button>)}</div>
-      {group==='utsav'&&<><h2>Choose your festival</h2><div className="offering-grid festival-grid" role="group" aria-label="Festival">{['dolotsav','pragatya-divas-maha-bhog','nand-mahotsav','adhikmas-hindola','annakut'].map(slug=>categories.find(c=>c.slug===slug)).filter((c):c is GivingCategoryRecord=>Boolean(c)).map(c=><button type="button" key={c._id} aria-pressed={category===c._id} onClick={()=>{if(category!==c._id)chooseCategory(c._id)}}>{c.image&&<CatalogImage src={c.image} fallback="/images/diya.webp" alt=""/>}<strong>{c.name}</strong><span>{category===c._id?'✓ Selected':'Choose festival'}</span></button>)}</div></>}
+      <div className="offering-grid" role="group" aria-label="Donation category">{donationGroups.map(([slug,label])=><button type="button" key={slug} aria-pressed={group===slug} onClick={()=>{if(group===slug)return;setGroup(slug);chooseCategory(categories.find(c=>c.slug===slug)?._id||'');}}><HandHeart aria-hidden="true"/><strong>{label}</strong><span>{group===slug?'✓ Selected':'Choose offering'}</span></button>)}</div>
+      {group==='utsav'&&<><h2>Choose your festival</h2><div className="offering-grid festival-grid" role="group" aria-label="Festival">{festivalCategorySlugs.map(slug=>categories.find(c=>c.slug===slug)).filter((c):c is GivingCategoryRecord=>Boolean(c)).map(c=><button type="button" key={c._id} aria-pressed={category===c._id} onClick={()=>{if(category!==c._id)chooseCategory(c._id)}}>{c.image&&<CatalogImage src={c.image} fallback="/images/diya.webp" alt=""/>}<strong>{c.name}</strong><span>{category===c._id?'✓ Selected':'Choose festival'}</span></button>)}</div></>}
       {chosen&&<><h2>2. Choose Giving</h2><p>{chosen.description}</p><div className="offering-grid giving-grid" role="group" aria-label="Giving opportunity">{options.map(g=><button type="button" key={g._id} aria-pressed={selected===g.slug} onClick={()=>chooseGiving(g.slug)}><strong>{g.title}</strong>{g.description&&<span>{g.description}</span>}<span>{selected===g.slug?'✓ Selected':'Select this Giving'}</span></button>)}</div></>}
       {optionsLoading?<p role="status">Loading Giving options…</p>:category&&!options.length&&<p>No active Giving options are available in this category.</p>}
       {opportunity&&<p className="catalog-description">{opportunity.description}</p>}
