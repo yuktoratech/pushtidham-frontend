@@ -65,12 +65,12 @@ async function send<T>(
   if (token) headers.set("Authorization", `Bearer ${token}`);
   let response: Response;
   try {
-    response = await fetch(`${baseUrl}${path}`, {
+    response = await fetch(path.startsWith('/auth/') ? `/api/v1${path}` : `${baseUrl}${path}`, {
       ...options,
       headers,
       credentials: "include",
       cache: "no-store",
-      signal: options.signal ?? AbortSignal.timeout(15000),
+      signal: options.signal ?? AbortSignal.timeout(path.startsWith('/auth/') ? 45000 : 15000),
     });
   } catch {
     throw new ApiError(
@@ -138,9 +138,7 @@ export function refreshSession(): Promise<AuthResult> {
   };
   // Serialize refresh across tabs as well as concurrent requests in this document.
   const pending = (async () => {
-    if (typeof navigator !== "undefined" && navigator.locks)
-      return await navigator.locks.request("pushtidham-auth-refresh", refresh);
-    return await refresh();
+    return await sessionOperation(refresh);
   })();
   const shared = pending.finally(() => {
     refreshPromise = null;
@@ -149,6 +147,11 @@ export function refreshSession(): Promise<AuthResult> {
   refreshRevision = version;
   refreshPromise = shared;
   return shared;
+}
+async function sessionOperation<T>(operation: () => Promise<T>): Promise<T> {
+  if (typeof navigator !== 'undefined' && navigator.locks)
+    return await navigator.locks.request('pushtidham-auth-refresh', operation);
+  return await operation();
 }
 export async function apiRequest<T>(
   path: string,
@@ -176,14 +179,17 @@ export async function apiRequest<T>(
         "Your session changed. Please try again.",
       );
     }
+    let retryToken = accessToken;
     try {
       if (accessToken === usedToken) await refreshSession();
+      retryToken = accessToken;
       return await send<T>(path, options);
     } catch (retryError) {
       if (
         retryError instanceof ApiError &&
         retryError.status === 401 &&
-        usedRevision === revision
+        retryError.code !== 'SESSION_CHANGED' &&
+        usedRevision === revision && accessToken === retryToken
       ) {
         clearAccessToken();
         onInvalidSession();
@@ -194,19 +200,19 @@ export async function apiRequest<T>(
 }
 export const authApi = {
   login: (email: string, password: string) =>
-    send<AuthResult>(
+    sessionOperation(() => send<AuthResult>(
       "/auth/login",
       { method: "POST", body: JSON.stringify({ email, password }) },
       null,
-    ),
+    )),
   register: (name: string, email: string, password: string, phone = "") =>
-    send<AuthResult>(
+    sessionOperation(() => send<AuthResult>(
       "/auth/register",
       { method: "POST", body: JSON.stringify({ name, email, password, phone }) },
       null,
-    ),
+    )),
   logout: () =>
-    send<null>("/auth/logout", { method: "POST", body: "{}" }, null),
+    sessionOperation(() => send<null>("/auth/logout", { method: "POST", body: "{}" }, null)),
   me: () => apiRequest<AuthUser>("/auth/me"),
   profile: (body: {name: string; email: string; phone: string}) =>
     apiRequest<AuthUser>("/auth/profile", {method: "PATCH", body: JSON.stringify(body)}),
