@@ -1,0 +1,16 @@
+.offline-correction { margin: 0; padding: 26px; }
+.admin-real-dialog .offline-correction .offline-section { border: 1px solid #ded7c9; padding: 20px; margin-bottom: 20px; }
+.offline-correction h2 { margin-top: 0; }
+.offline-correction .adm-field { margin-bottom: 16px; }
+.offline-correction textarea { min-height: 88px; }
+.offline-correction .adm-modal-actions { flex-wrap: wrap; gap: 12px; }
+.correction-review { margin: 20px 0; }
+.correction-review > div { border-bottom: 1px solid #ded7c9; padding: 12px 0; }
+.correction-review dt { font-weight: 700; }
+.correction-review dd { margin: 8px 0 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+.correction-review dd span, .correction-review dd strong { display: block; }
+.correction-history { margin-top: 24px; }
+.correction-history article { padding: 16px 0; border-top: 1px solid #ded7c9; overflow-wrap: anywhere; }
+.correction-history pre { white-space: pre-wrap; overflow-wrap: anywhere; font-family: inherit; font-size: 14px; }
+.correction-history button { min-height: 44px; }
+@media (max-width: 640px) { .offline-correction { padding: 18px; } .admin-real-dialog .offline-correction .offline-section { padding: 14px; } .correction-review dd { font-size: 16px; } }
