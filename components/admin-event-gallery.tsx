@@ -30,7 +30,7 @@ export function AdminEventGallery({value,cover,onChange,onCover,onBusy,onPending
      catch(reason){setLocal(rows=>rows.map(row=>row.id===item.id?{...row,state:'error',error:catalogErrorMessage(reason)}:row));}
    }}finally{inFlight.current=false;onBusy(false);}
  }
- return <fieldset className="adm-image-field adm-field-wide" disabled={disabled}><legend>Event gallery</legend><p>Preview files, then upload. Save the Event to attach images. Removed images are retained in storage for recovery.</p>
+ return <fieldset className="adm-image-field adm-field-wide" disabled={disabled}><legend>Event gallery</legend><p>Preview files, then upload. Save the Event to attach images. Removed images are deleted from storage after saving if they are no longer used.</p>
  <input aria-label="Select gallery images" type="file" multiple accept=".jpg,.jpeg,.png,.webp" onChange={e=>{select(e.target.files);e.target.value=''}}/>
  {error&&<p role="alert" className="adm-error">{error}</p>}
  {local.length>0&&<progress aria-label="Gallery upload progress" max={local.length} value={local.filter(row=>row.state==="uploaded").length}/>}

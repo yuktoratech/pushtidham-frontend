@@ -62,7 +62,7 @@ export function AdminImageField({kind,value,onChange,temporaryUrl,onTemporaryCha
     if(objectUrl.current){URL.revokeObjectURL(objectUrl.current);objectUrl.current='';}
     if(temporaryUrl===value)onTemporaryChange(undefined);
     onChange('');
-    setMessage('Image removed from this form. The uploaded file is retained for recovery.');
+    setMessage('Image removed from this form. Save the record to remove the old image from storage if it is no longer used.');
   }
   const shown=preview||value;
   return <fieldset className="adm-image-field adm-field-wide" disabled={disabled||uploading}>
