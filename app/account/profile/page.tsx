@@ -2,7 +2,6 @@
 
 import {useState, type FormEvent} from 'react';
 import {Check, PencilLine, UserRound} from 'lucide-react';
-import {AccountLayout} from '../../../components/account-layout';
 import {FormInput} from '../../../components/auth-form';
 import {useAuth} from '../../../components/auth-provider';
 import {ApiError, authApi, authErrorMessage} from '../../../lib/api-client';
@@ -89,12 +88,12 @@ export default function ProfilePage() {
     setFailure('');
     setValues(contact);
   }
-  return <AccountLayout title="My Profile" description="Review and update your donor account contact details.">
+  return <>
     <section className="account-panel profile-panel" aria-labelledby="profile-panel-title">
       <div className="account-panel-heading"><span className="account-summary-icon"><UserRound aria-hidden="true"/></span><div><p className="eyebrow">Donor details</p><h2 id="profile-panel-title">Profile Information</h2></div></div>
       {notice && <div className="account-success" role="status"><Check aria-hidden="true"/><p>{notice}</p></div>}
       {failure && <p className="auth-error" role="alert">{failure}</p>}
       {!editing ? <><dl className="profile-detail-list"><div><dt>First Name</dt><dd>{values.firstName}</dd></div><div><dt>Last Name</dt><dd>{values.lastName}</dd></div><div><dt>Email Address</dt><dd>{values.email}</dd></div><div><dt>Phone Number</dt><dd>{values.phone || 'Not provided'}</dd></div></dl><button className="button profile-edit-button" onClick={() => {setEditing(true); setNotice('');}}><PencilLine aria-hidden="true"/>Edit Profile</button></> : <form className="account-form" onSubmit={submit} noValidate><div className="account-profile-form-grid"><FormInput {...props('firstName', 'First Name', 'given-name')}/><FormInput {...props('lastName', 'Last Name', 'family-name')}/><div className="account-form-span"><FormInput {...props('email', 'Email Address', 'email', 'email')}/></div><div className="account-form-span"><FormInput {...props('phone', 'Phone Number', 'tel', 'tel')}/></div></div><div className="account-form-actions"><button className="button" type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save Changes'}</button><button className="account-cancel-button" type="button" onClick={stopEditing} disabled={saving}>Cancel</button></div></form>}
     </section>
-  </AccountLayout>;
+  </>;
 }

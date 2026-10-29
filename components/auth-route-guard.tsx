@@ -5,9 +5,11 @@ import { useAuth } from "./auth-provider";
 export function AuthRouteGuard({
   role,
   children,
+  fallback,
 }: {
   role?: "admin";
   children: ReactNode;
+  fallback?: ReactNode;
 }) {
   const auth = useAuth();
   const path = usePathname();
@@ -25,6 +27,7 @@ export function AuthRouteGuard({
     else if (!allowed) router.replace("/account");
   }, [auth.status, auth.error, allowed, path, role, router]);
   if (allowed) return <>{children}</>;
+  if (fallback) return <>{fallback}</>;
   return (
     <main className="container checkout-empty" role="status">
       {auth.error ? (

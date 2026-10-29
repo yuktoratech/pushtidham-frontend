@@ -21,7 +21,7 @@ test('startup cold start stays recoverable and an authenticated connection error
  t.mock.method(globalThis,'fetch',async url=>cold?response(null,503):response(url.endsWith('/refresh')?{accessToken:'fixture-access',user}:user));
  await auth.restoreAuth();assert.equal(auth.getAuthState().status,'unavailable');assert.ok(auth.getAuthState().error);
  cold=false;await auth.restoreAuth(true);assert.equal(auth.getAuthState().status,'authenticated');
- cold=true;await auth.restoreAuth(true);assert.equal(auth.getAuthState().status,'authenticated');assert.deepEqual(auth.getAuthState().user,user);
+ cold=true;const pending=auth.restoreAuth(true);assert.equal(auth.getAuthState().status,'authenticated');await pending;assert.equal(auth.getAuthState().status,'authenticated');assert.deepEqual(auth.getAuthState().user,user);
 });
 
 test('definitively invalid refresh signs out and no token is persisted',async t=>{

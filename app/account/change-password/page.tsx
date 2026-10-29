@@ -3,7 +3,6 @@
 import {useState, type FormEvent} from 'react';
 import {useRouter} from 'next/navigation';
 import {KeyRound} from 'lucide-react';
-import {AccountLayout} from '../../../components/account-layout';
 import {PasswordInput} from '../../../components/auth-form';
 import {useAuth} from '../../../components/auth-provider';
 import {ApiError, authApi, authErrorMessage} from '../../../lib/api-client';
@@ -67,12 +66,12 @@ export default function ChangePasswordPage() {
       }
     } finally {setPending(false);}
   }
-  return <AccountLayout title="Change Password" description="Update the password for your donor account.">
+  return <>
     <section className="account-panel account-password-panel" aria-labelledby="change-password-title">
       <div className="account-panel-heading"><span className="account-summary-icon"><KeyRound aria-hidden="true"/></span><div><p className="eyebrow">Account security</p><h2 id="change-password-title">Change Password</h2></div></div>
       <p>After changing your password, all sessions will be signed out. Sign in again with the new password.</p>
       {failure && <p className="auth-error" role="alert">{failure}</p>}
       <form className="account-form account-password-form" onSubmit={submit} noValidate><PasswordInput {...props('currentPassword', 'Current Password', 'current-password')}/><PasswordInput {...props('newPassword', 'New Password', 'new-password', registrationPasswordRequirements)}/><PasswordInput {...props('confirmPassword', 'Confirm New Password', 'new-password')}/><button className="button account-password-submit" type="submit" disabled={pending}>{pending ? 'Updating…' : 'Change Password'}</button></form>
     </section>
-  </AccountLayout>;
+  </>;
 }

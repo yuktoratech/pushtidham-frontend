@@ -45,7 +45,7 @@ export const subscribeAuth = (listener: () => void) => {
 };
 export const getAuthState = () => state;
 export const getServerAuthState = () => initial;
-export async function restoreAuth(force = false) {
+export async function restoreAuth(force = false, identityChanged = false) {
   if (restoration) return restoration;
   if (!force && state.status !== "initializing") return;
   clearDemoAuth();
@@ -56,12 +56,13 @@ export async function restoreAuth(force = false) {
         clearAccessToken();
         publish({ status: "unauthenticated", user: null, error: null });
       }
-      if (event.data === 'session-changed') void restoreAuth(true);
+      if (event.data === 'session-changed') void restoreAuth(true, true);
     };
   }
   const previous = state;
-  publish(initial);
-  const version = beginAuthChange();
+  const background = previous.status === 'authenticated' && !identityChanged;
+  if (!background) publish(initial);
+  const version = background ? getSessionRevision() : beginAuthChange();
   restoration = (async () => {
     try {
       await refreshSession();
