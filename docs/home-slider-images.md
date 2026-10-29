@@ -1,10 +1,17 @@
 # Official homepage slideshow
 
-The website displays exactly two slides: the existing
-`public/images/devotional-hero.webp` artwork shown in the approved hero reference,
-followed by the official Haveli exterior photograph. Hero height is 470px on
+The website displays the supplied Adhik Maas Shrinathji artwork first, followed by
+the existing devotional hero and official Haveli exterior photograph. The supplied
+1200 × 848 PNG was refined with image generation and adapted to a 1920 × 1356 WebP
+for the slider, retaining the artwork's composition and aspect ratio. It is an
+adapted version of the supplied image, not a higher-resolution original. The
+first slide serves the 1920px R2 object at
+`home-slider/adhik-maas-shrinathji/adhik-maas-shrinathji-hd.webp`, with a
+960px mobile version at `home-slider/adhik-maas-shrinathji/adhik-maas-shrinathji-960.webp`.
+
+Hero height is 470px on
 desktop and 420px on mobile; welcome text and Donate Now / Learn More links
-remain over both images. Rotation continues every six seconds unless paused.
+remain over the images. Rotation continues unless paused.
 
 Previously, four photographs were sourced from the slider on
 https://www.pushtidhamocala.org/index.asp, in the original order:
@@ -36,6 +43,6 @@ keyboard arrows and touch swipes support manual navigation. Interaction pauses
 rotation; a play button resumes it. Reduced-motion preferences disable automatic
 rotation by default. Photographs fall back to existing local devotional artwork
 on load failure. Welcome text and donation links remain over the photographs
-as an overlay matching the approved reference. Only the devotional artwork and
-the Haveli exterior are selected by the current manifest; the other uploaded
+as an overlay matching the approved reference. The new artwork, existing devotional
+hero and Haveli exterior are selected by the current manifest; the other uploaded
 objects are preserved without being displayed.
