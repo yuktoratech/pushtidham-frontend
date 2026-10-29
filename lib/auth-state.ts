@@ -11,7 +11,7 @@ import {
   type AuthUser,
 } from "./api-client";
 export type AuthState = {
-  status: "initializing" | "authenticated" | "unauthenticated";
+  status: "initializing" | "authenticated" | "unauthenticated" | "unavailable";
   user: AuthUser | null;
   error: string | null;
 };
@@ -56,26 +56,27 @@ export async function restoreAuth(force = false) {
         clearAccessToken();
         publish({ status: "unauthenticated", user: null, error: null });
       }
+      if (event.data === 'session-changed') void restoreAuth(true);
     };
   }
+  const previous = state;
   publish(initial);
   const version = beginAuthChange();
   restoration = (async () => {
     try {
-      const result = await refreshSession();
+      await refreshSession();
       const user = await authApi.me();
-      if (acceptAccessToken(result.accessToken, version))
+      if (version === getSessionRevision())
         publish({ status: "authenticated", user, error: null });
     } catch (error) {
-      if (getAuthState().status === "initializing")
-        publish({
-          status: "unauthenticated",
-          user: null,
-          error:
-            error instanceof ApiError && error.status === 401
-              ? null
-              : authErrorMessage(error),
-        });
+      if (version !== getSessionRevision()) return;
+      if (error instanceof ApiError && error.status === 401 && error.code !== 'SESSION_CHANGED') {
+        clearAccessToken();
+        publish({status: 'unauthenticated', user: null, error: null});
+      } else {
+        // Offline, rate limits and Render cold starts are connection failures, not sign-outs.
+        publish({...previous, status: previous.status === 'authenticated' ? 'authenticated' : 'unavailable', error: authErrorMessage(error)});
+      }
     } finally {
       restoration = null;
     }
@@ -106,6 +107,7 @@ async function authenticate(
     );
   clearDemoAuth();
   publish({ status: "authenticated", user, error: null });
+  channel?.postMessage('session-changed');
   return user;
 }
 export const login = (email: string, password: string) =>
